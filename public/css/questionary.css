@@ -1,14 +1,27 @@
 .questionary { width: 800px; border: 2px solid #808080; border-radius: 7px; background: #fafafa; padding: 5px; }
 .questionary-head { text-align: center; font-variant: small-caps; border : 0px black solid; border: 0px black solid; border-bottom: 1px black solid;}
 .questionary-item { width: 100%; padding: 5px 3px; position: relative;}
-.questionary-label,.questionary-content { background: #EEEEEE; margin: 2px; padding: 5px 2px; width: inherit;}
-.questionary-label {float: left; width: 390px; }
-.questionary-content { float: right; width: 390px; }
+.questionary-label,.questionary-content { background: #EEEEEE; margin: 2px; padding: 3px 2px; width: inherit; vertical-align: middle; }
+.questionary-label {float: left; width: 389px; }
+.questionary-content { float: right; width: 389px; margin-right: 8px; }
 .questionary-clearer { clear: both; }
 
 /* LABEL */
-.questionary-item-label { width: 794px; display: block; max-width: none;}
+.questionary-item-label { width: 786px; display: block; max-width: none;}
 
 /* GROUP */
 div.questionary-item-group-label { border: 0px; border-top: 1px black solid; margin: 15px 0 2px 0; }
-div.questionary-item-group-content { border: 0px; border-bottom: 1px black solid; margin 2px 0 15px 0;}
+div.questionary-item-group-content { border: 0px; border-bottom: 1px black solid; margin: 2px 0 15px 0;}
+div.questionary-item-group-content div.questionary-item { margin: 0; padding: 5px 0; }
+
+/* TEXT */
+input.questionary-item-text { width: 100%; }
+
+/* TEXTAREA */
+textarea.questionary-item-textarea { width: 100%; height: 8em; }
+
+/* RADIO */
+span.questionary-item-radio-item {width: 40px; text-align: center; display: block; float: left; }
+
+/* SELECT */
+select.questionary-item-select { width: 100%; }
