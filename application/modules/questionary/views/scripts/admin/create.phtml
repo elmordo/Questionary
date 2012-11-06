@@ -1,0 +1,12 @@
+<h1>Tvorba nového dotazníku</h1>
+<form action="/questionary/admin/post" method="post">
+	<p>
+		<?php 
+		echo $this->formLabel("questionary[name]", "Jméno dotazníku:");
+		echo $this->formText("questionary[name]");
+		?>
+	</p>
+	<p>
+		<?php echo $this-> formSubmit("questionary-submit", "Vytvořit"); ?>
+	</p>
+</form>

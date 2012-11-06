@@ -1,0 +1,19 @@
+<script type="text/javascript">
+<?php
+echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());
+?>
+</script>
+<form action="/questionary/client/save" method="post" class="questionary-form" id="<?php echo $this->formId; ?>">
+	<div id="questionary-content"></div>
+	<div id="questionary-controll">
+		<p>
+			<?php 
+			echo $this->formReset("questionary-reset", "Obnovit hodnoty");
+			echo $this->formSubmit("questionary-submit", "Odeslat dotazník");
+			echo $this->formSubmit("questionary-save", "Uložit hodnoty");
+			echo $this->formHidden("questionary-filled-id", $this->filled->id);
+			?>
+		</p>
+	</div>
+</form>
+<script type="text/javascript" src="/js/questionary/client/fill.js"></script>

@@ -1,0 +1,6 @@
+- univerzální systém pro dotazníky
+- řešit jako modul (instalace do jiného projektu nezávislá na zbytku daného projektu)
+- ukládání do zvláštních datových struktur pro možnost dalšího vyhodnocení
+- separovaný model od zbytku aplikace
+- možnost sdružovat otázky do grup
+- různé možnosti odpovědí na otázku (select, radio skupina, textové pole atd)

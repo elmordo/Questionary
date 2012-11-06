@@ -1,0 +1,14 @@
+<h1>Seznam vytvořených dotazníků</h1>
+<ul>
+	<?php 
+	foreach ($this->questionaries as $questionary) {
+		?>
+	<li>
+		<a href="/questionary/admin/edit?questionary[id]=<?php echo $questionary->id; ?>">
+			<?php echo $questionary->name; ?>
+		</a>
+	</li>
+		<?php 
+	}
+	?>
+</ul>

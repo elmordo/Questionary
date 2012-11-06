@@ -1,0 +1,12 @@
+<h1>Seznam dotazníků k dispozici</h1>
+<ul>
+	<?php 
+	foreach ($this->questionaries as $questionary) {
+		?>
+	<li>
+		<a href="/questionary/client/get?questionary[id]=<?php echo $questionary->id; ?>"><?php echo $questionary->name?></a>
+	</li>
+		<?php 
+	}
+	?>
+</ul>
