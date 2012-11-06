@@ -262,6 +262,26 @@ QUESTIONARY.__BASE__.prototype._clearContainer = function () {
 	return this;
 };
 
+// vypocita velikosti prvku
+QUESTIONARY.__BASE__.prototype._recalculateHeight = function () {
+	// nacteni prvku
+	var label = this._node.find(".questionary-label");
+	var content = this._node.find(".questionary-content");
+	
+	var labelHeight = label.css("height");
+	var contentHeight = content.css("height");
+	
+	labelHeight = Number(labelHeight.substr(0, labelHeight.length - 2));
+	contentHeight = Number(contentHeight.substr(0, contentHeight.length - 2));
+	
+	// vyhodnoceni vyssiho prvku
+	if (labelHeight > contentHeight) {
+		content.css("height", labelHeight + "px");
+	} else {
+		label.css("height", contentHeight + "px");
+	}
+};
+
 // protected - zapise prvek do kontejneru
 QUESTIONARY.__BASE__.prototype._setContainer = function (container) {
 	// odebrani z kontejneru
@@ -448,6 +468,12 @@ QUESTIONARY.Questionary.prototype.render = function () {
 	// prochazeni itemu a jejich rendering
 	for (var i in this._items) {
 		retVal.append(this._items[i].renderItem());
+	}
+	
+	retVal.appendTo("body");
+	
+	for (var i in this._items) {
+		this._items[i]._recalculateHeight();
 	}
 	
 	return retVal;
@@ -837,6 +863,10 @@ QUESTIONARY.SingleInput.prototype.toArray = function () {
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.Label);
 
+QUESTIONARY.Label.prototype._recalculateHeight = function () {
+	
+}
+
 QUESTIONARY.Label.prototype.renderItem = function () {
 	var retVal = QUESTIONARY.__BASE__.prototype.renderItem.call(this);
 	
@@ -1070,7 +1100,16 @@ QUESTIONARY.Group.prototype.init = function (node) {
 		} else {
 			content.hide();
 		}
+		
+		// rekalkulace zobrazeni
+		for (var i in instance._items) {
+			instance._items[i]._recalculateHeight();
+		}
 	});
+};
+
+QUESTIONARY.Group.prototype._recalculateHeight = function () {
+	
 };
 
 QUESTIONARY.Group.prototype.renderItem = function () {
