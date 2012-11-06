@@ -1,0 +1,6 @@
+*~
+.*
+!.gitignore
+*Debug*
+application/configs/application.ini
+library/Zend
