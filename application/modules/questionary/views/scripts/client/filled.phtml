@@ -3,7 +3,9 @@
 echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());
 ?>
 </script>
-<form action="/questionary/client/save" method="post" class="questionary-form" id="<?php echo $this->formId; ?>">
-	<div id="questionary-content"></div>
-</form>
+<div class="questionary-container">
+	<form action="/questionary/client/save" method="post" class="questionary-form" id="<?php echo $this->formId; ?>">
+		<div id="questionary-content"></div>
+	</form>
+</div>
 <script type="text/javascript" src="/js/questionary/client/fill.js"></script>
