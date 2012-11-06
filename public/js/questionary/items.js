@@ -1102,14 +1102,14 @@ QUESTIONARY.Group.prototype.init = function (node) {
 		}
 		
 		// rekalkulace zobrazeni
-		for (var i in instance._items) {
-			instance._items[i]._recalculateHeight();
-		}
+		instance._recalculateHeight();
 	});
 };
 
 QUESTIONARY.Group.prototype._recalculateHeight = function () {
-	
+	for (var i in this._items) {
+		this._items[i]._recalculateHeight();
+	}
 };
 
 QUESTIONARY.Group.prototype.renderItem = function () {
