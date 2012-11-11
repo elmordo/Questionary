@@ -9,6 +9,20 @@ class AdminController extends Zend_Controller_Action {
 	}
 	
 	/**
+	 * smaze dotaznik
+	 */
+	public function deleteqAction() {
+		
+	}
+	
+	/**
+	 * smaze uzivatele
+	 */
+	public function deleteuserAction() {
+		
+	}
+	
+	/**
 	 * zobrazi vyplneny dotaznik
 	 */
 	public function filledAction() {
@@ -23,6 +37,13 @@ class AdminController extends Zend_Controller_Action {
 	}
 	
 	/**
+	 * vypise informace o uzivateli
+	 */
+	public function getuserAction() {
+		
+	}
+	
+	/**
 	 * vypis menu
 	 */
 	public function indexAction() {
@@ -33,6 +54,20 @@ class AdminController extends Zend_Controller_Action {
 	 * vypis formulare pro login
 	 */
 	public function loginAction() {
+		
+	}
+	
+	/**
+	 * vytvori uzivatele
+	 */
+	public function postuserAction() {
+		
+	}
+	
+	/**
+	 * updatuje uzivaetle
+	 */
+	public function putuserAction() {
 		
 	}
 	
