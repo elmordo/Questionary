@@ -7,6 +7,10 @@ class Application_Model_Users extends Zend_Db_Table_Abstract {
 	
 	protected $_name = "application_users";
 	
+	protected $_rowsetClass = "Application_Model_Rowset_Users";
+	
+	protected $_rowClass = "Application_Model_Row_User";
+	
 	/**
 	 * vytvori noveho uzivatele a zapise ho do databaze
 	 * 

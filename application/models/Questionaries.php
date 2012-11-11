@@ -21,6 +21,10 @@ class Application_Model_Questionaries extends Zend_Db_Table_Abstract {
 		)
 	);
 	
+	protected $_rowsetClass = "Application_Model_Rowset_Questionaries";
+	
+	protected $_rowClass = "Application_Model_Row_Questionary";
+	
 	/**
 	 * nacte informace o dotaznicich podle uzivatele
 	 * 
