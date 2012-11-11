@@ -6,6 +6,9 @@ var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
 <p>
 	<em><?php echo $this->questionary->getName(); ?></em>
 </p>
+<p>
+	Odkaz na dotazník pro klienta: <em><?php echo "http://" . $_SERVER["SERVER_NAME"] . "/client/get?key=" . $this->info->display_key; ?></em>
+</p>
 <div id="new-item">
 	<h3>Nový prvek</h3>
 	<ul>

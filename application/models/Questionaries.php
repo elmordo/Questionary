@@ -41,6 +41,17 @@ class Application_Model_Questionaries extends Zend_Db_Table_Abstract {
 			"user_id" => $user->id
 		));
 		
+		// vygenerovani display klice
+		$key = time() . microtime() . $questionary->id;
+		
+		do {
+			$keyBase = sha1($key . microtime());
+			
+			$key = substr($keyBase, 0, 8);
+		} while ($this->fetchRow("display_key like '$key'"));
+		
+		$infos->display_key = $key;
+		
 		$infos->save();
 		
 		return array(
