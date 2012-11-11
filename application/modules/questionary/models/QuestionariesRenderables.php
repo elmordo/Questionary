@@ -7,6 +7,10 @@ class Questionary_Model_QuestionariesRenderables extends Zend_Db_Table_Abstract 
 	
 	protected $_primary = array("questionary_id", "item_id");
 	
+	protected $_rowsetClass = "Questionary_Model_Rowset_QuestionariesRenderables";
+	
+	protected $_rowClass = "Questionary_Model_Row_QuestionaryRenderable";
+	
 	protected $_referenceMap = array(
 			"item" => array(
 					"columns" => "item_id",
