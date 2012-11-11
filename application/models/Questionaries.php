@@ -5,6 +5,8 @@ class Application_Model_Questionaries extends Zend_Db_Table_Abstract {
 	
 	protected $_sequence = false;
 	
+	protected $_name = "application_questionary";
+	
 	protected $_referenceMap = array(
 		"questionary" => array(
 			"columns" => "questionary_id",

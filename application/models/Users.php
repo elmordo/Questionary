@@ -5,6 +5,8 @@ class Application_Model_Users extends Zend_Db_Table_Abstract {
 	
 	protected $_sequence = true;
 	
+	protected $_name = "application_users";
+	
 	/**
 	 * vytvori noveho uzivatele a zapise ho do databaze
 	 * 
