@@ -26,6 +26,30 @@ class Application_Model_Questionaries extends Zend_Db_Table_Abstract {
 	protected $_rowClass = "Application_Model_Row_Questionary";
 	
 	/**
+	 * vytvori novy dotaznik
+	 * 
+	 * @param Application_Model_Row_User $user uzivatel
+	 * @param string $name jmeno dotazniku
+	 * @return array
+	 */
+	public function createQuestionary(Application_Model_Row_User $user, $name) {
+		$tableQuestionaries = new Questionary_Model_Questionaries();
+		
+		$questionary = $tableQuestionaries->createQuestionary($name);
+		$infos = $this->createRow(array(
+			"questionary_id" => $questionary->id,
+			"user_id" => $user->id
+		));
+		
+		$infos->save();
+		
+		return array(
+			"questionary" => $questionary,
+			"info" => $infos
+		);
+	}
+	
+	/**
 	 * nacte informace o dotaznicich podle uzivatele
 	 * 
 	 * @return Application_Model_Rowset_Questionaries
