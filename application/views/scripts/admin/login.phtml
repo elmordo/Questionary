@@ -1,0 +1,18 @@
+<h1>Přihlášení do systému</h1>
+<form action="/admin/signin" method="post">
+	<p>
+		<?php 
+		echo $this->formLabel("user[login]", "Přihlašovací jméno");
+		echo $this->formText("user[login]");
+		?>
+	</p>
+	<p>
+		<?php
+		echo $this->formLabel("user[password]", "Heslo");
+		echo $this->formPassword("user[password]");
+		?>
+	</p>
+	<p>
+		<?php echo $this->formSubmit("login-submit", "Přihlásit"); ?>
+	</p>
+</form>
