@@ -1,0 +1,36 @@
+<a href="/admin/index/index">Zpět na hlavní stranu</a>
+<h1>Seznam dotazníků</h1>
+<ul>
+	<?php
+	foreach ($this->own as $item) {
+		?>
+	<li>
+		<a href="/admin/editq?questionary[id]=<?php echo $item["questionary"]->id; ?>">
+			<?php echo $item["questionary"]->name; ?>
+		</a>
+	</li>
+		<?php
+	}
+	?>
+</ul>
+<?php
+// pokud cizi dotazniky nejsou dostupne, ukonci se zpracovani
+if (!$this->other->count()) return;
+?>
+<h2>Cizí dotazníky dostupné k editaci</h2>
+<ul>
+	<?php
+	foreach ($this->other as $item) {
+		$user = $item->findParentRow("Application_Model_Users", "user");
+		$questionary = $item->findParentRow("Questionary_Model_Questionaries", "questionary");
+		
+		?>
+	<li>
+		<a href="/admin/editq?questionary[id]=<?php echo $questionary->id; ?>">
+			<?php echo $questionary->name . " ($user->login)"; ?>
+		</a>
+	</li>
+		<?php
+	}
+	?>
+</ul>

@@ -1,0 +1,65 @@
+<script type="text/javascript">
+var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
+</script>
+<a href="/admin/qlist">Na seznam dotazníků</a>
+<h1>Editace dotazníku</h1>
+<p>
+	<em><?php echo $this->questionary->getName(); ?></em>
+</p>
+<div id="new-item">
+	<h3>Nový prvek</h3>
+	<ul>
+		<li><button type="button" name="add-item" value="Label">Popisek</button>
+		<li><button type="button" name="add-item" value="Text">Řádkové vstupní pole</button>
+		<li><button type="button" name="add-item" value="TextArea">Velké textové pole</button>
+		<li><button type="button" name="add-item" value="Select">Rozbalovací výběr</button>
+		<li><button type="button" name="add-item" value="Radio">Výběr zaškrtávacího políčka (radio)</button>
+		<li><button type="button" name="add-item" value="Group">Skupina hodnot</button>
+	</ul>
+</div>
+<form action="/questionary/admin/put" method="post" id="form-questionary-edit">
+	<p>
+		<?php 
+		echo $this->formLabel("questionary[name]", "Jméno dotazníku:");
+		echo $this->formText("questionary[name]", $this->questionary->getName());
+		?>
+	</p>
+	<p>
+		<?php
+		$checked = $this->info->is_visible ? array("checked" => "checked") : array();
+		
+		echo $this->formCheckbox("questionary[is_visible]", 1, $checked);
+		echo $this->formLabel("questionary[is_visible]", "Viditelnost vyplněných dotazníků ostatním");
+		?>
+	</p>
+	<p>
+		<?php
+		$checked = $this->info->is_editable ? array("checked" => "checked") : array();
+		
+		echo $this->formCheckbox("questionary[is_editable]", 1, $checked);
+		echo $this->formLabel("questionary[is_editable]", "Možnost editovat ostatním");
+		?>
+	</p>
+	<p>
+		<?php
+		$checked = $this->info->is_published ? array("checked" => "checked") : array();
+		
+		echo $this->formCheckbox("questionary[is_published]", 1, $checked);
+		echo $this->formLabel("questionary[is_published]", "Publikováno pro klienty");
+		?>
+	</p>
+	<div id="questionary-item-container">
+	
+	</div>
+	<p>
+		<?php 
+		echo $this->formHidden("questionary[id]]", $this->questionaryRow->id);
+		echo $this->formSubmit("questionary-edit-submit", "Uložit dotazník");
+		?>
+	</p>
+</form>
+<div id="items-panel">
+	<h3>Prvky</h3>
+	<ul id="items"></ul>
+</div>
+<script type="text/javascript" src="/js/admin/editq.js"></script>

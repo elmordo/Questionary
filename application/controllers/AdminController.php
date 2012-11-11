@@ -57,7 +57,27 @@ class AdminController extends Zend_Controller_Action {
 	 * editace sablony dotazniku
 	 */
 	public function editqAction() {
+		// nacteni dat
+		$data = $this->getRequest()->getParam("questionary", array());
+		$data = array_merge(array("id" => 0), $data);
 		
+		// nacteni dotazniku
+		try {
+			$tableQuestionaries = new Questionary_Model_Questionaries();
+			$questionary = $tableQuestionaries->find($data["id"])->current();
+			
+			if (!$questionary) throw new Zend_Exception("Questionary not found");
+		} catch (Zend_Exception $e) {
+			die($e->getMessage());
+			$this->_forward("list");
+			return;
+		}
+		
+		$info = $this->_tableQuestionaries->find($questionary->id)->current();
+		
+		$this->view->questionary = $questionary->toClass();
+		$this->view->questionaryRow = $questionary;
+		$this->view->info = $info;
 	}
 	
 	/**
@@ -99,7 +119,25 @@ class AdminController extends Zend_Controller_Action {
 	 * vytvori novy dotaznik
 	 */
 	public function postqAction() {
+		// nacteni dat
+		$data = $this->getRequest()->getParam("questionary", array());
+		$data = array_merge(array("name" => ""), $data);
 		
+		// kontrola dat
+		try {
+			if (empty($data["name"])) throw new Zend_Exception("Name is empty");
+		} catch (Zend_Exception $e) {
+			$this->_forward("index");
+			return;
+		}
+		
+		// vytvoreni dotazniku
+		$q = $this->_tableQuestionaries->createQuestionary($this->_user, $data["name"]);
+		
+		// presmerovani
+		$info = $q["info"];
+		
+		$this->_redirect("/admin/editq?questionary[id]=" . $info->questionary_id);
 	}
 	
 	/**
@@ -113,7 +151,36 @@ class AdminController extends Zend_Controller_Action {
 	 * ulozi dotaznik
 	 */
 	public function putqJsonAction() {
+		// nacteni dat
+		$data = $this->getRequest()->getParam("questionary", array());
+		$data = array_merge(array("id" => 0, "content" => null, "is_published" => 0, "is_visible" => 0, "is_editable" => 0), $data);
 		
+		// vyhodnoceni dat
+		if (!$data["id"] || is_null($data["content"])) throw new Zend_Exception("Invalid sent data");
+		
+		// nacteni dotazniku
+		$tableQuestionaries = new Questionary_Model_Questionaries();
+		$questionaryRow = $tableQuestionaries->loadById($data["id"]);
+		
+		if (!$questionaryRow) throw new Zend_Exception("Questionary #" . $data["id"] . " has not been found");
+		
+		$questionary = $questionaryRow->toClass();
+		$questionary->setFromArray($data["content"]);
+		
+		$questionaryRow->saveClass($questionary);
+		
+		// aktualizace dat informaci
+		$info = $this->_tableQuestionaries->find($questionaryRow->id)->current();
+		
+		$info->is_visible = $data["is_visible"];
+		$info->is_published = $data["is_published"];
+		$info->is_editable = $data["is_editable"];
+		
+		$info->save();
+		
+		// vypnuti layoutu
+		$this->view->layout()->disableLayout();
+		$this->view->questionary = $questionary;
 	}
 	
 	/**
@@ -127,7 +194,19 @@ class AdminController extends Zend_Controller_Action {
 	 * vypis sablon dotazniku
 	 */
 	public function qlistAction() {
+		// nacteni vlastnich dotazniku
+		$ownQ = $this->_user->findQuestionaries();
 		
+		// nacteni editable ostatnich
+		$where = array(
+			"is_editable",
+			"user_id != " . $this->_user->id
+		);
+		
+		$otherQ = $this->_tableQuestionaries->fetchAll($where);
+		
+		$this->view->own = $ownQ;
+		$this->view->other = $otherQ;
 	}
 	
 	/**
