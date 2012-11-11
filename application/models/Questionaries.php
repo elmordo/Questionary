@@ -5,7 +5,7 @@ class Application_Model_Questionaries extends Zend_Db_Table_Abstract {
 	
 	protected $_sequence = false;
 	
-	protected $_name = "application_questionary";
+	protected $_name = "application_questionaries";
 	
 	protected $_referenceMap = array(
 		"questionary" => array(

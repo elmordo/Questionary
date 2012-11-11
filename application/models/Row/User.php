@@ -12,7 +12,7 @@ class Application_Model_Row_User extends Zend_Db_Table_Row_Abstract {
 	 * @return array
 	 */
 	public function findQuestionaries() {
-		$infos = $this->findDependentRowset(new Application__Model_Questionaries, "user");
+		$infos = $this->findDependentRowset(new Application_Model_Questionaries, "user");
 		$infoIndex = array();
 		
 		$questionaryIds = array(0);
