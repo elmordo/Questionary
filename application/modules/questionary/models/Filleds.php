@@ -16,7 +16,15 @@ class Questionary_Model_Filleds extends Zend_Db_Table_Abstract {
 	
 	protected $_rowClass = "Questionary_Model_Row_Filled";
 	
-	public function createFilled($questionary) {
+	protected $_rowsetClass = "Questionary_Model_Rowset_Filleds";
+	
+	/**
+	 * vytvori novy zaznam o vyplneni
+	 * 
+	 * @param Questionary_Model_Row_Questionary
+	 * @return Questionary_Model_Row_Filled
+	 */
+	public function createFilled(Questionary_Model_Row_Questionary $questionary) {
 		$row = $this->createRow(array(
 				"questionary_id" => $questionary->id,
 				"modified_at" => new Zend_Db_Expr("NOW()")
