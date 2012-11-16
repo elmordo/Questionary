@@ -71,6 +71,12 @@ var QUESTIONARY = {
 			this._className = "Radio";
 		},
 		
+		"ValueList" : function (name) {
+			QUESTIONARY.ChooseInput.call(this, name);
+			
+			this._className = "ValueList";
+		},
+		
 		"Group" : function (name) {
 			QUESTIONARY.Container.call(this, name);
 			
@@ -508,6 +514,15 @@ QUESTIONARY.Questionary.prototype.setFromArray = function (data) {
 		var itemDef = data["itemList"][i];
 		
 		this._itemIndex[itemDef["name"]].setFromArray(itemDef);
+	}
+	
+	// zapis vykreslovanych prvku
+	this._items = new Array();
+	
+	for (var i in data.items) {
+		var itemName = data.items[i];
+		
+		this.setRenderable(this._itemIndex[itemName], true);
 	}
 	
 	return this;
@@ -1065,6 +1080,47 @@ QUESTIONARY.Radio.prototype.renderItem = function () {
 };
 
 QUESTIONARY.Radio.prototype.toArray = function () {
+	var retVal = QUESTIONARY.ChooseInput.prototype.toArray.call(this);
+	
+	return retVal;
+};
+
+/*
+ * OBJEKT VALUELIST
+ */
+ 
+QUESTIONARY.__EXTENDS__(QUESTIONARY.ChooseInput, QUESTIONARY.ValueList);
+
+QUESTIONARY.ValueList.prototype.init = function (node) {
+	// inicializace celeho itemu
+	QUESTIONARY.ChooseInput.prototype.init.call(this, node);
+	
+	node = $(node);
+};
+
+QUESTIONARY.ValueList.prototype.renderItem = function () {
+	var retVal = QUESTIONARY.ChooseInput.prototype.renderItem.call(this);
+	
+	// pripojeni pole
+	var content = $("<div class='questionary-item-radio'>");
+	
+	// vyhodnoceni vychozi hodnoty
+	var val = this.getValue();
+	
+	// zapis moznosti
+	for (var i in this._options) {
+		var span = $("<span class='questionary-item-valuelist-item'>").appendTo(content).text(this._options[i]);
+	}
+	
+	content.val(this._filledVal);
+	content.appendTo(retVal.find(".questionary-content"));
+	
+	this.init(retVal);
+	
+	return retVal;
+};
+
+QUESTIONARY.ValueList.prototype.toArray = function () {
 	var retVal = QUESTIONARY.ChooseInput.prototype.toArray.call(this);
 	
 	return retVal;

@@ -205,7 +205,7 @@ class Questionary_Questionary {
 		$this->_items = array();
 		
 		foreach ($data["items"] as $itemName) {
-			$renders[] = $this->_itemIndex[$itemName];
+			$this->_items[] = $this->_itemIndex[$itemName];
 		}
 		
 		return $this;
@@ -254,7 +254,8 @@ class Questionary_Questionary {
 		}
 		
 		// zapis na konec seznamu
-		$buffer[] = $item;
+		if ($renderable)
+			$buffer[] = $item;
 		
 		// prepis hodnot
 		$this->_items = $buffer;

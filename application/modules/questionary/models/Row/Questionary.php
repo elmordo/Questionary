@@ -28,6 +28,10 @@ class Questionary_Model_Row_Questionary extends Zend_Db_Table_Row_Abstract {
 			$dbItemIndex[$item->name] = $item;
 		}
 		
+		// vyprezdneni renderable
+		$tableRenderables = new Questionary_Model_QuestionariesRenderables();
+		$tableRenderables->delete("questionary_id = " . $tableRenderables->getAdapter()->quote($this->id));
+		
 		// prochazeni zaznamu dotazniku a update nebo vytvoreni hodnot
 		foreach ($items as $item) {
 			// kontrola, jeslti je item v indexu
@@ -59,6 +63,26 @@ class Questionary_Model_Row_Questionary extends Zend_Db_Table_Row_Abstract {
 			$row->save();
 		}
 		
+		// zapis renderables
+		$renderables = $questionary->getItems();
+		$insert = array(
+				"questionary_id" => $this->id,
+				"item_id" => 0,
+				"position" => 0
+		);
+		
+		$i = 0;
+		
+		foreach ($renderables as $item) {
+			// priprava dat
+			$itemRow = $dbItemIndex[$item->getName()];
+			
+			$insert["item_id"] = $itemRow->id;
+			$insert["position"] = $i++;
+			
+			$tableRenderables->insert($insert);
+		}
+		
 		$tableItems->delete($where);
 	}
 	
@@ -70,10 +94,15 @@ class Questionary_Model_Row_Questionary extends Zend_Db_Table_Row_Abstract {
 		// nacteni dat
 		$items = $this->findDependentRowset("Questionary_Model_QuestionariesItems", "questionary");
 		
-		// prochazeni a registrace itemu
+		// prochazeni a registrace itemu a jejich indexace dle id
+		$itemIndex = array();
+		
 		foreach ($items as $item) {
 			// vytvoreni instance
 			$itemInstance = $retVal->addItem($item->name, $item->class);
+			$retVal->setRenderable($itemInstance, false);
+			
+			$itemIndex[$item->id] = $item;
 		}
 		
 		// nastaveni parametru
@@ -89,6 +118,20 @@ class Questionary_Model_Row_Questionary extends Zend_Db_Table_Row_Abstract {
 			);
 				
 			$instance->setFromArray($params);
+		}
+		
+		// nacteni zobrazovanych itemu
+		$tableRenderables = new Questionary_Model_QuestionariesRenderables();
+		
+		$reders = $this->findDependentRowset($tableRenderables, "questionary", $tableRenderables->select(false)->order("position"));
+		
+		foreach ($reders as $render) {
+			// ziskani jmena
+			$itemName = $itemIndex[$render->item_id]->name;
+			
+			// ziskani itemu
+			$item = $retVal->getByName($itemName);
+			$retVal->setRenderable($item, true);
 		}
 		
 		return $retVal;
