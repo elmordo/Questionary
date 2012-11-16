@@ -18,8 +18,8 @@ class Questionary_Model_QuestionariesRenderables extends Zend_Db_Table_Abstract 
 					"refColumns" => "id"
 			),
 			
-			"quesitonary" => array(
-					"columns" => "questionary_it",
+			"questionary" => array(
+					"columns" => "questionary_id",
 					"refTableClass" => "Questionary_Model_Questionaries",
 					"refColumns" => "id"
 			)

@@ -53,6 +53,7 @@ $(function() {
 		switch (currentItem.className()) {
 		case "Select":
 		case "Radio":
+		case "ValueList":
 			writeChoose(dialog);
 			break;
 			
@@ -199,6 +200,7 @@ $(function() {
 		switch (item.className()) {
 		case "Radio":
 		case "Select":
+		case "ValueList":
 			var specContainer = $("<fieldset id='specific'>").append($("<legend>").text("Nastavení výběru")).appendTo(container);
 			writeChooseEdit(item, specContainer);
 			break;

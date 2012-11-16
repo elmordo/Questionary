@@ -6,6 +6,8 @@
 .questionary-label {float: left; width: 385px; }
 .questionary-content { float: right; width: 385px; margin-right: 8px; }
 .questionary-clearer { clear: both; }
+#questionary-controll { text-align: center; }
+#questionary-save, #questionary-submit, #questionary-reset { width: 150px; margin: 0px 10px; height: 2em; border-radius: 1em; border: 3px solid #d0e8f0; cursor: pointer; cursor: hand; }
 
 /* LABEL */
 .questionary-item-label { width: 786px; display: block; max-width: none;}
@@ -23,6 +25,9 @@ textarea.questionary-item-textarea { width: 100%; height: 8em; }
 
 /* RADIO */
 span.questionary-item-radio-item {width: 40px; text-align: center; display: block; float: left; }
+
+/* VALUELIST */
+span.questionary-item-valuelist-item {width: 40px; text-align: center; display: block; float: left; }
 
 /* SELECT */
 select.questionary-item-select { width: 100%; }
