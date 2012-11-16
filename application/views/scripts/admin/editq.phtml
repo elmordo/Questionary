@@ -18,6 +18,7 @@ var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
 		<li><button type="button" name="add-item" value="Select">Rozbalovací výběr</button>
 		<li><button type="button" name="add-item" value="Radio">Výběr zaškrtávacího políčka (radio)</button>
 		<li><button type="button" name="add-item" value="Group">Skupina hodnot</button>
+		<li><button type="button" name="add-item" value="ValueList">Hodnoty pro zaškrtávací políčka</button>
 	</ul>
 </div>
 <form action="/questionary/admin/put" method="post" id="form-questionary-edit">

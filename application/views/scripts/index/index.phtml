@@ -1,7 +1,15 @@
-<ul>
-	<li>
-		<a href="/questionary/admin/create">Vytvořit dotazník</a>
-		<a href="/questionary/admin/list">Seznam dotazníků</a>
-		<a href="/questionary/client/list">Vyplnit dotazník</a>
-	</li>
-</ul>
+<div id="wrapper-inner">
+	<h1>Dotazníky G U A R D 7, v.o.s.</h1>
+	<hr />
+	<form action="/client/get" method="get" id="key-form">
+		<p>
+			<?php echo $this->formLabel("key", "Klíč dotazníku (8 znaků)"); ?>
+		</p>
+		<p>
+			<?php echo $this->formText("key", null, array("maxlength" => 8, "class" => Zend_Registry::isRegistered("error") ? "error" : "")); ?>
+		</p>
+		<p>
+			<?php echo $this->formSubmit("submit", "Zobrazit dotazník"); ?>
+		</p>
+	</form>
+</div>

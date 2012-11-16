@@ -1,0 +1,21 @@
+body {
+	font-family: Arial;
+}
+
+#wrapper {
+	width: 850px;
+	margin: auto;
+}
+
+#head {
+	text-align: center;
+	margin: 5px 0 15px 0;
+}
+
+#wrapper-inner { width: 800px; border: 2px solid #808080; border-radius: 7px; background: #fafafa; padding: 5px; margin: 10px 0px }
+#wrapper-inner h1 { color: #bc1e1e; text-align: center; font-variant: small-caps; }
+
+#key-form p { font-size: x-large; text-align: center; font-weight: bold; }
+#key-form input {width: 300px; height: 50px; font-size: 1em; text-align: center; }
+#key-form input.error { border: red 1px solid; background-color: #ff6e6e; border-radius: 3px; }
+#finish-questionary { margin: 15px; text-align: center; font-size: x-large;}

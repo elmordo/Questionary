@@ -8,6 +8,9 @@
 		<a href="/admin/editq?questionary[id]=<?php echo $item["questionary"]->id; ?>">
 			<?php echo $item["questionary"]->name; ?>
 		</a>
+		(<a href="/admin/filledlist?questionary[id]=<?php echo $item["questionary"]->id; ?>">
+			Zobrazit vyplněné
+		</a>)
 	</li>
 		<?php
 	}

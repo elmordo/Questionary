@@ -84,14 +84,56 @@ class AdminController extends Zend_Controller_Action {
 	 * zobrazi vyplneny dotaznik
 	 */
 	public function filledAction() {
+		// nacteni dat
+		$data = $this->getRequest()->getParam("filled", array());
+		$data = array_merge(array("id" => 0), $data);
 		
+		// kontrola dat
+		try {
+			$tableFilleds = new Questionary_Model_Filleds();
+			$filled = $tableFilleds->getById($data["id"]);
+			
+			if (!$filled) throw new Zend_Exception("Filled values group #" . $data["id"] . " has not been found");
+			
+			// kontrola zamceni
+			// if (!$filled->is_locked) throw new Zend_Exception("Filled values group #$filled->id is not locked to edit");
+		} catch (Zend_Exception $e) {
+			throw $e;
+		}
+		
+		$questionary = $filled->toClass();
+		$questionary->setLocked(true);
+		
+		$this->view->questionary = $questionary;
+		$this->view->filled = $filled;
 	}
 	
 	/**
 	 * vypis vyplnenych dotazniku jednoho druhu
 	 */
 	public function filledlistAction() {
+		$data = $this->getRequest()->getParam("questionary", array());
+		$data = array_merge(array("id" => 0), $data);
 		
+		// kontrola dat
+		$quesionary = null;
+		
+		try {
+			$tableQuestionaries = new Questionary_Model_Questionaries();
+			$quesionary = $tableQuestionaries->find($data["id"])->current();
+			
+			if (!$quesionary) throw new Zend_Exception();
+		} catch (Zend_Exception $e) {
+			$this->_forward("qlist");
+			return;
+		}
+		
+		// nalezeni vyplnenych dotazniku
+		$tableFilleds = new Questionary_Model_Filleds();
+		$filleds = $quesionary->findDependentRowset($tableFilleds, "questionary", $tableFilleds->select()->order("filled_at desc"));
+		
+		$this->view->questionary = $quesionary;
+		$this->view->filleds = $filleds;
 	}
 	
 	/**

@@ -1,0 +1,16 @@
+<a href="/admin/qlist">Zpět na seznam</a>
+<h1>Vyplněné dotazníky</h1>
+<h2><?php echo $this->questionary->name; ?></h2>
+<ul>
+	<?php
+	foreach ($this->filleds as $item) {
+		?>
+	<li>
+		<a href="/admin/filled?filled[id]=<?php echo $item->id; ?>">
+			<?php echo $item->filled_at; ?>
+		</a>
+	</li>
+		<?php
+	}
+	?>
+</ul>

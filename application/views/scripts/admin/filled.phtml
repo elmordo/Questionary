@@ -1,0 +1,12 @@
+<a href="/admin/filledlist?questionary[id]=<?php echo $this->filled->questionary_id; ?>">Zpět na seznam</a>
+<script type="text/javascript">
+<?php
+echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());
+?>
+</script>
+<div class="questionary-container">
+	<form action="/questionary/client/save" method="post" class="questionary-form" id="<?php echo $this->formId; ?>">
+		<div id="questionary-content"></div>
+	</form>
+</div>
+<script type="text/javascript" src="/js/client/fill.js"></script>
