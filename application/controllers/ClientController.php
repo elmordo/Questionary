@@ -61,13 +61,16 @@ class ClientController extends Zend_Controller_Action {
 	public function saveAction($redirect = true) {
 		// nacteni dat
 		$data = $this->getRequest()->getParams();
-		$data = array_merge(array("questionary-filled-id" => 0), $data);
+		$data = array_merge(array("questionary-filled-key" => ""), $data);
 		
 		// nacteni dotazniku
-		$tableFilleds = new Questionary_Model_Filleds();
-		$filled = $tableFilleds->getById($data["questionary-filled-id"]);
+		$tableFilleds = new Application_Model_Filleds();
+		$trans = $tableFilleds->find($data["questionary-filled-key"])->current();
 		
-		if (!$filled) throw new Zend_Exception("Filled values group #" . $data["questionary-filled-id"] . " has not been found");
+		if (!$trans) throw new Zend_Exception("Filled values group #" . $data["questionary-filled-key"] . " has not been found");
+		
+		// nacteni dotazniku
+		$filled = $trans->findParentRow("Questionary_Model_Filleds", "filled");
 		
 		// vytvoreni instance
 		$questionary = $filled->toClass();
@@ -88,7 +91,7 @@ class ClientController extends Zend_Controller_Action {
 		
 		// presmerovani
 		if ($redirect)
-			$this->_redirect("/client/fill?filled[id]=" . $filled->id);
+			$this->_redirect("/client/fill?key=" . $trans->key);
 	}
 	
 	public function submitAction() {

@@ -12,7 +12,7 @@ echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());
 				echo $this->formReset("questionary-reset", "Obnovit hodnoty");
 				echo $this->formSubmit("questionary-submit", "Odeslat dotazník");
 				echo $this->formSubmit("questionary-save", "Uložit hodnoty");
-				echo $this->formHidden("questionary-filled-id", $this->filled->id);
+				echo $this->formHidden("questionary-filled-key", $this->trans->key);
 				?>
 			</p>
 		</div>
