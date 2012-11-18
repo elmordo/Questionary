@@ -2,6 +2,7 @@ $(function() {
 	var questionary = new QUESTIONARY.Questionary();
 	
 	questionary.setName($("#questionary-name").val());
+	questionary.setDesingMode(true);
 	
 	var dialog = null;
 	

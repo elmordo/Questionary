@@ -169,6 +169,9 @@ QUESTIONARY.__BASE__.prototype.defVal = function (value) {
 
 // vraci nebo nastavi vylnenou hodnotu
 QUESTIONARY.__BASE__.prototype.filledVal = function (value) {
+	// kontrola designModu
+	if (value !== undefined && this._questionary.getDesignMode()) return this;
+	
 	if (value !== undefined) this._isFilled = true;
 	
 	return this._getOrSet("_filledVal", value);
@@ -303,6 +306,9 @@ QUESTIONARY.__BASE__.prototype._setContainer = function (container) {
  * OBJEKT DOTAZNIKU
  */
 
+// prepinac designoveho kodu
+QUESTIONARY.Questionary.prototype._designMode = false;
+
 // jmeno dotazniku
 QUESTIONARY.Questionary.prototype._name = "";
 
@@ -349,6 +355,11 @@ QUESTIONARY.Questionary.prototype.getByName = function (name) {
 	if (this._itemIndex[name] == undefined) throw "Item named " + name + " is not existing in this questionary";
 	
 	return this._itemIndex[name];
+};
+
+// vraci TRUE, pokud je dotaznik v design modu
+QUESTIONARY.Questionary.prototype.getDesignMode = function () {
+	return this._designMode;
 };
 
 // vraci index prvku
@@ -412,6 +423,13 @@ QUESTIONARY.Questionary.prototype.getRenderable = function (item) {
 	}
 	
 	return retVal;
+};
+
+// nastavi prepinac design modu
+QUESTIONARY.Questionary.prototype.setDesingMode = function (mode) {
+	this._designMode = Boolean(mode);
+	
+	return this;
 };
 
 // nastavni uzamceni dotazniku
