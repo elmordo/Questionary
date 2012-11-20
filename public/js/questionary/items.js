@@ -226,6 +226,7 @@ QUESTIONARY.__BASE__.prototype.renderItem = function () {
 	$("<div class='questionary-content'>").appendTo(retVal);
 	$("<br class='questionary-clearer'>").appendTo(retVal);
 	$("<input type='hidden' name='className'>").val(this._className).appendTo(retVal);
+	$("<input type='hidden' name='itemName'>").val(this._name).appendTo(retVal);
 	
 	this._node = retVal;
 	
