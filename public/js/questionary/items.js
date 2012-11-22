@@ -1082,7 +1082,7 @@ QUESTIONARY.Radio.prototype.renderItem = function () {
 	
 	// zapis moznosti
 	for (var i in this._options) {
-		var span = $("<span class='questionary-item-radio-item'>").appendTo(content);
+		var span = $("<span>").addClass('questionary-item-radio-item').appendTo(content);
 		var input = $("<input type='radio'>").attr("name", this._name).val(i)
 			.attr("title", this._options[i]).appendTo(span);
 		
@@ -1090,7 +1090,6 @@ QUESTIONARY.Radio.prototype.renderItem = function () {
 		if (i == val) input.attr("checked", "checked");
 	}
 	
-	content.val(this._filledVal);
 	content.appendTo(retVal.find(".questionary-content"));
 	
 	this.init(retVal);
@@ -1128,10 +1127,11 @@ QUESTIONARY.ValueList.prototype.renderItem = function () {
 	
 	// zapis moznosti
 	for (var i in this._options) {
-		var span = $("<span class='questionary-item-valuelist-item'>").appendTo(content).text(this._options[i]);
+		//var span = $("<span class='questionary-item-valuelist-item'>").text(this._options[i]);
+                var span = $("<span>").addClass("questionary-item-valuelist-item").appendTo(content).text(this._options[i]);
+                
 	}
 	
-	content.val(this._filledVal);
 	content.appendTo(retVal.find(".questionary-content"));
 	
 	this.init(retVal);
