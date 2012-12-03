@@ -72,6 +72,17 @@ class ClientController extends Zend_Controller_Action {
 		// nacteni dotazniku
 		$filled = $trans->findParentRow("Questionary_Model_Filleds", "filled");
 		
+		// kontrola uzamceni
+		if ($filled->is_locked) {
+			// dotaznik je uzamcen
+			if ($redirect) {
+				$this->_redirect("/client/fill?key=" . $trans->key);
+				return;
+			} else {
+				return;
+			}
+		}
+		
 		// vytvoreni instance
 		$questionary = $filled->toClass();
 		
@@ -99,8 +110,14 @@ class ClientController extends Zend_Controller_Action {
 		$this->saveAction(false);
 		
 		// nacteni filled
-		$tableFilleds = new Questionary_Model_Filleds();
-		$filled = $tableFilleds->getById($this->getRequest()->getParam("questionary-filled-id", 0));
+		$tableFilleds =  new Application_Model_Filleds();;
+		$filled = $tableFilleds->find($this->getRequest()->getParam("questionary-filled-key", 0))->current()->findParentRow("Questionary_Model_Filleds");
+		
+		// kontrola uzamceni
+		if ($filled->is_locked) {
+			$this->_redirect("/client/finish");
+			return;
+		}
 		
 		// uzamceni dat
 		$tableFilledsItems = new Questionary_Model_FilledsItems();
@@ -113,6 +130,19 @@ class ClientController extends Zend_Controller_Action {
 		// oznaceni zaznamu jako vyplneneho
 		$filled->is_locked = 1;
 		$filled->save();
+		
+		// odeslani emailu
+		$mailer = new Zend_Mail("utf-8");
+		$mailer->setFrom("dotaznik@eskoleni.eu", "System dotazniku");
+		$mailer->addTo("jan.tesar@guard7.cz", "Jan Tesař");
+		
+		$mailer->setSubject("Vyplnen dotaznik");
+		
+		$text = "Byl vyplnen novy dotaznik.\n\nZobrazit ho muzete prechodem na adresu http://questionary.eskoleni.eu/admin/filled?filled[id]=" . $filled->id;
+		$text .= "\n\npro zobrazeni musite byt prihlasen jako admin";
+		
+		$mailer->setBodyText($text);
+		$mailer->send();
 		
 		// presmerovani na zobrazeni vyplneneho dotazniku
 		$this->_redirect("/client/finish");

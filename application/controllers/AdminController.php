@@ -130,7 +130,7 @@ class AdminController extends Zend_Controller_Action {
 		
 		// nalezeni vyplnenych dotazniku
 		$tableFilleds = new Questionary_Model_Filleds();
-		$filleds = $quesionary->findDependentRowset($tableFilleds, "questionary", $tableFilleds->select()->order("filled_at desc"));
+		$filleds = $quesionary->findDependentRowset($tableFilleds, "questionary", $tableFilleds->select()->where("is_locked")->order("filled_at desc"));
 		
 		$this->view->questionary = $quesionary;
 		$this->view->filleds = $filleds;
