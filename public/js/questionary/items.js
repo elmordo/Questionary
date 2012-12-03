@@ -426,6 +426,17 @@ QUESTIONARY.Questionary.prototype.getRenderable = function (item) {
 	return retVal;
 };
 
+// vraci vsechny hodnoty v Objectu
+QUESTIONARY.Questionary.prototype.getValues = function () {
+	var retVal = {};
+	
+	for (var i in this._itemIndex) {
+		retVal[i] = this._itemIndex[i].getValue();
+	}
+	
+	return retVal;
+};
+
 // nastavi prepinac design modu
 QUESTIONARY.Questionary.prototype.setDesingMode = function (mode) {
 	this._designMode = Boolean(mode);
