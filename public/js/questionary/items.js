@@ -472,7 +472,7 @@ QUESTIONARY.Questionary.prototype.removeItem = function (item) {
 	for (i in this._itemIndex) {
 		// pokud zpracovavany objekt neni odebirany, zapise se do noveho indexu
 		if (this._itemIndex[i] != item) {
-			newIndex[i] = item;
+			newIndex[i] = this._itemIndex[i];
 		}
 	}
 	
