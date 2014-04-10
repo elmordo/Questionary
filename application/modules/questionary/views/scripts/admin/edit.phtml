@@ -1,6 +1,7 @@
 <script type="text/javascript">
 var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
 </script>
+<a href="/questionary/admin/index">Zpět na seznam</a> | <a target="preview" href="/questionary/client/get?questionary[id]=<?php echo $this->questionaryRow->id; ?>">Zobrazit náhled</a>(bude vytvořena instance dotazníku)
 <h1>Editace dotazníku</h1>
 <p>
 	<em><?php echo $this->questionary->getName(); ?></em>
@@ -11,10 +12,12 @@ var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
 		<li><button type="button" name="add-item" value="Label">Popisek</button>
 		<li><button type="button" name="add-item" value="Text">Řádkové vstupní pole</button>
 		<li><button type="button" name="add-item" value="TextArea">Velké textové pole</button>
+        <li><button type="button" name="add-item" value="CheckBox">Zaškrtávací políčko</button>
 		<li><button type="button" name="add-item" value="Select">Rozbalovací výběr</button>
 		<li><button type="button" name="add-item" value="Radio">Výběr zaškrtávacího políčka (radio)</button>
 		<li><button type="button" name="add-item" value="Group">Skupina hodnot</button>
-			<li><button type="button" name="add-item" value="ValueList">Hodnoty pro zaškrtávací políčka</button>
+		<li><button type="button" name="add-item" value="ValueList">Hodnoty pro zaškrtávací políčka</button>
+        <li><button type="button" name="add-item" value="GridView">Datová tabulka</button>
 	</ul>
 </div>
 <form action="/questionary/admin/put" method="post" id="form-questionary-edit">
@@ -33,6 +36,13 @@ var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
 		echo $this->formSubmit("questionary-edit-submit", "Uložit dotazník");
 		?>
 	</p>
+</form>
+<h2>Smazat dotazník</h2>
+<form action="/questionary/admin/delete" method="post" onsubmit="return confirm('Skutečně smazat dotazník?\nVyplněné dotazníky nebudou nijak ovlivněny.');">
+    <?php
+    echo $this->formHidden("questionaryId", $this->questionaryRow->id);
+    echo $this->formSubmit("submit", "Smazat dotazník");
+    ?>
 </form>
 <div id="items-panel">
 	<h3>Prvky</h3>

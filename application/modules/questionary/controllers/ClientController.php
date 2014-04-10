@@ -1,5 +1,39 @@
 <?php
 class Questionary_ClientController extends Zend_Controller_Action {
+
+	/**
+	 * obsahuje konfiguraci nactenou z ini souboru
+	 * @var Array
+	 */
+	private $_config=null;
+
+	/**
+	 * pripravi instanci k pouziti
+	 */
+	public function init() {
+		// nacteni konfigurace
+		$config = Zend_Controller_Front::getInstance()->getParam("bootstrap")->getApplication()->getOption("questionary");
+
+		$this->_config = array_merge(array("callback" => array()), $config);
+	}
+
+	public function deleteAction() {
+		// nacteni dat
+		$data = $this->_request->getParam("filled", array());
+		$data = array_merge(array("id" => 0), $data);
+
+		// nacteni informaci z databaze
+		$tableFilleds = new Questionary_Model_Filleds();
+		$filled = $tableFilleds->find($data["id"])->current();
+
+		if (!$filled) throw new Exception("Filled questionary was not found", 1);
+
+		// provedeni callbacku
+		$filledClass = $filled->toClass();
+		$this->_doCallback("delete", $filledClass, $filled, array());
+
+		$filled->delete();
+	}
 	
 	public function listAction() {
 		// nacteni seznamu dotazniku
@@ -20,12 +54,20 @@ class Questionary_ClientController extends Zend_Controller_Action {
 		
 		if (!$questionary) throw new Zend_Exception("Questionary id " . $data["id"] . " not found");
 		
-		// zapsani vyplneni
+		// zapsani vyplneni a prevod na objektovou reprezentaci
 		$tableFilleds = new Questionary_Model_Filleds();
 		$filled = $tableFilleds->createFilled($questionary);
-		
+		$filledClass = $filled->toClass();
+
+		// provedeni call backu
+		$this->_doCallback("get", $filledClass, $filled, $this->_request->getParam("params", array()));
+
+		// ulozeni zmenenych hodnot
+		$filled->saveFilledData($filledClass);
+
 		// presmerovani na vyplneni
-		$this->_redirect("/questionary/client/fill?filled[id]=" . $filled->id);
+		$this->view->filled = $filled;
+		$this->view->params = (array) $this->_request->getParam("params", array());
 	}
 	
 	public function fillAction() {
@@ -44,13 +86,23 @@ class Questionary_ClientController extends Zend_Controller_Action {
 			
 			// vytvoreni dotazniku a naplneni dat
 			$questionary = $filled->toClass();
+			
+			// provedeni callbacku
+			$this->_doCallback("fill", $questionary);
 		} catch (Zend_Exception $e) {
 			// pokracovani probublanu
 			throw $e;
 		}
+
+		// nastaveni hodnot tlacitek
+		$config = array_merge(array("button" => array()), $this->_config);
+		$buttons = array_merge(array("submit" => 1, "save" => 1, "reset" => 1), $config["button"]);
 		
 		$this->view->questionary = $questionary;
 		$this->view->filled = $filled;
+		$this->view->questionary = $questionary;
+		$this->view->params = (array) $this->_request->getParam("params", array());
+		$this->view->buttons = $buttons;
 	}
 	
 	public function filledAction() {
@@ -67,13 +119,12 @@ class Questionary_ClientController extends Zend_Controller_Action {
 			
 			// kontrola zamceni
 			if (!$filled->is_locked) throw new Zend_Exception("Filled values group #$filled->id is not locked to edit");
+
+			$questionary = $filled->toClass();
+
 		} catch (Zend_Exception $e) {
 			throw $e;
 		}
-		
-		$questionary = $filled->toClass();
-		
-		$this->view->questionary = $questionary;
 	}
 	
 	public function saveAction($redirect = true) {
@@ -99,14 +150,16 @@ class Questionary_ClientController extends Zend_Controller_Action {
 				$item->fill($data[$item->getName()]);
 			}
 		}
+
+		$this->_doCallback("save", $questionary, $filled, (array) $this->_request->getParam("params"));
 		
 		// ulozeni dat
 		$filled->saveFilledData($questionary);
 		$filled->save();
 		
 		// presmerovani
-		if ($redirect)
-			$this->_redirect("/questionary/client/fill?filled[id]=" . $filled->id);
+		$this->view->filled = $filled;
+		$this->view->params = (array) $this->_request->getParam("params", array());
 	}
 	
 	public function submitAction() {
@@ -131,5 +184,15 @@ class Questionary_ClientController extends Zend_Controller_Action {
 		
 		// presmerovani na zobrazeni vyplneneho dotazniku
 		$this->_redirect("/questionary/client/filled?filled[id]=" . $filled->id);
+	}
+
+	protected function _doCallback($callback, $questionary, $filled=null, array $params = array()) {
+		// provedeni callbacku
+		if (isset($this->_config["callback"][$callback])) {
+			$className = $this->_config["callback"][$callback];
+			$callback = new $className();
+
+			$callback->callback($questionary, $filled, $params);
+		}
 	}
 }

@@ -3,3 +3,16 @@
 		Informace byly úspěšně odeslány. Děkujeme za vyplnění dotazníku.
 	</p>
 </div>
+<?php 
+if ($this->key) {
+	?>
+<p>
+Verze dotazníku pro tisk: <?php 
+$href = "http://" . $_SERVER["SERVER_NAME"] . "/client/print?key=" . $this->key;
+
+echo "<a href='$href' target='_blank'>$href</a>";
+?>
+</p>
+	<?php 
+}
+?>

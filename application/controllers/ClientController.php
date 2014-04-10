@@ -55,7 +55,12 @@ class ClientController extends Zend_Controller_Action {
 	}
 	
 	public function finishAction() {
-		
+		$this->view->key = $this->getRequest()->getParam("key", false);
+	}
+	
+	public function printAction() {
+		// nacteni data
+		$this->fillAction();
 	}
 	
 	public function saveAction($redirect = true) {
@@ -93,6 +98,13 @@ class ClientController extends Zend_Controller_Action {
 			// pokud je prvek odeslan, nastavi se
 			if (isset($data[$item->getName()])) {
 				$item->fill($data[$item->getName()]);
+			} else {
+				// kontrola chybnych mezer
+				$newName = str_replace(" ", "_", $item->getName());
+				
+				if (isset($data[$newName])) {
+					$item->fill($data[$newName]);
+				}
 			}
 		}
 		
@@ -110,8 +122,9 @@ class ClientController extends Zend_Controller_Action {
 		$this->saveAction(false);
 		
 		// nacteni filled
-		$tableFilleds =  new Application_Model_Filleds();;
-		$filled = $tableFilleds->find($this->getRequest()->getParam("questionary-filled-key", 0))->current()->findParentRow("Questionary_Model_Filleds");
+		$key = $this->getRequest()->getParam("questionary-filled-key", 0);
+		$tableFilleds =  new Application_Model_Filleds();
+		$filled = $tableFilleds->find($key)->current()->findParentRow("Questionary_Model_Filleds");
 		
 		// kontrola uzamceni
 		if ($filled->is_locked) {
@@ -131,10 +144,23 @@ class ClientController extends Zend_Controller_Action {
 		$filled->is_locked = 1;
 		$filled->save();
 		
+		// nacteni ciloveho emailu
+		$tableQFilleds = new Questionary_Model_Filleds();
+		$tableQuestionaries = new Application_Model_Questionaries();
+		
+		$nameAFilleds = $tableFilleds->info("name");
+		$nameFilleds = $tableQFilleds->info("name");
+		$nameAQuestionaries = $tableQuestionaries->info("name");
+		
+		$sql = "select `$nameAQuestionaries`.emails from `$nameAQuestionaries`, `$nameAFilleds`, `$nameFilleds` where ";
+		$sql .= "`$nameAFilleds`.`key` like " . $adapter->quote($key) . " and `$nameAFilleds`.`filled_id` = `$nameFilleds`.`id` and `$nameAQuestionaries`.`questionary_id` = `$nameFilleds`.questionary_id";
+		
+		$emailCol = $adapter->query($sql)->fetchColumn();
+		$emails = explode(",", $emailCol);
+		
 		// odeslani emailu
 		$mailer = new Zend_Mail("utf-8");
 		$mailer->setFrom("dotaznik@eskoleni.eu", "System dotazniku");
-		$mailer->addTo("jan.tesar@guard7.cz", "Jan Tesař");
 		
 		$mailer->setSubject("Vyplnen dotaznik");
 		
@@ -142,9 +168,27 @@ class ClientController extends Zend_Controller_Action {
 		$text .= "\n\npro zobrazeni musite byt prihlasen jako admin";
 		
 		$mailer->setBodyText($text);
-		$mailer->send();
+		
+		$validator = new Zend_Validate_EmailAddress();
+		$send = false;
+		
+		foreach ($emails as $email) {
+			$email = trim($email);
+			
+			if ($validator->isValid($email)) {
+				$mailer->addTo(trim($email));
+				$send = true;
+			}
+		}
+		
+		if ($send)
+			$mailer->send();
 		
 		// presmerovani na zobrazeni vyplneneho dotazniku
-		$this->_redirect("/client/finish");
+		// nacteni dat
+		$data = $this->getRequest()->getParams();
+		$data = array_merge(array("questionary-filled-key" => ""), $data);
+		
+		$this->_redirect("/client/finish?key=" . $data["questionary-filled-key"]);
 	}
 }

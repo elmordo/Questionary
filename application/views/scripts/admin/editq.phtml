@@ -9,7 +9,10 @@ var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
 <p>
 	Odkaz na dotazník pro klienta: <em><?php echo "http://" . $_SERVER["SERVER_NAME"] . "/client/get?key=" . $this->info->display_key; ?></em>
 </p>
-<div id="new-item">
+<div id="left" class="panel">
+	<h3>Nástroje</h3>
+	<input type="button" id="undo" value="<-" title="Zpět" disabled="disabled" />
+	<input type="button" id="redo" value="->" title="Zpět" disabled="disabled" />
 	<h3>Nový prvek</h3>
 	<ul>
 		<li><button type="button" name="add-item" value="Label">Popisek</button>
@@ -21,49 +24,93 @@ var QDATA = <?php echo Zend_Json::encode($this->questionary->toArray()); ?>
 		<li><button type="button" name="add-item" value="ValueList">Hodnoty pro zaškrtávací políčka</button>
 	</ul>
 </div>
-<form action="/questionary/admin/put" method="post" id="form-questionary-edit">
-	<p>
-		<?php 
-		echo $this->formLabel("questionary[name]", "Jméno dotazníku:");
-		echo $this->formText("questionary[name]", $this->questionary->getName());
-		?>
-	</p>
-	<p>
-		<?php
-		$checked = $this->info->is_visible ? array("checked" => "checked") : array();
-		
-		echo $this->formCheckbox("questionary[is_visible]", 1, $checked);
-		echo $this->formLabel("questionary[is_visible]", "Viditelnost vyplněných dotazníků ostatním");
-		?>
-	</p>
-	<p>
-		<?php
-		$checked = $this->info->is_editable ? array("checked" => "checked") : array();
-		
-		echo $this->formCheckbox("questionary[is_editable]", 1, $checked);
-		echo $this->formLabel("questionary[is_editable]", "Možnost editovat ostatním");
-		?>
-	</p>
-	<p>
-		<?php
-		$checked = $this->info->is_published ? array("checked" => "checked") : array();
-		
-		echo $this->formCheckbox("questionary[is_published]", 1, $checked);
-		echo $this->formLabel("questionary[is_published]", "Publikováno pro klienty");
-		?>
-	</p>
-	<div id="questionary-item-container">
-	
-	</div>
-	<p>
-		<?php 
-		echo $this->formHidden("questionary[id]]", $this->questionaryRow->id);
-		echo $this->formSubmit("questionary-edit-submit", "Uložit dotazník");
-		?>
-	</p>
-</form>
-<div id="items-panel">
+<div id="middle" class="panel">
+	<form action="/questionary/admin/put" method="post" id="form-questionary-edit">
+		<table>
+		<tr>
+			<td><?php echo $this->formLabel("questionary[name]", "Jméno dotazníku:"); ?></td>
+			<td><?php echo $this->formText("questionary[name]", $this->questionary->getName()); ?></td>
+		</tr>
+		<tr>
+			<td><?php
+			$checked = $this->info->is_visible ? array("checked" => "checked") : array();
+			
+			echo $this->formLabel("questionary[is_visible]", "Viditelnost vyplněných dotazníků ostatním");
+			?>
+			</td>
+			<td> <?php echo $this->formCheckbox("questionary[is_visible]", 1, $checked); ?></td>
+		</tr>
+		<tr>
+			<td>
+			<?php
+			$checked = $this->info->is_editable ? array("checked" => "checked") : array();
+			echo $this->formLabel("questionary[is_editable]", "Možnost editovat ostatním");
+			?>
+			</td>
+			<td><?php echo $this->formCheckbox("questionary[is_editable]", 1, $checked); ?></td>
+		</tr>
+		<tr>
+			<td>
+			<?php
+			$checked = $this->info->is_published ? array("checked" => "checked") : array();
+			echo $this->formLabel("questionary[is_published]", "Publikováno pro klienty");
+			?>
+			</td>
+			<td><?php echo $this->formCheckbox("questionary[is_published]", 1, $checked); ?></td>
+		</tr>
+		<tr>
+			<td><?php echo $this->formLabel("questionary[emails]", "Po vyplnění odeslat zprávu:"); ?></td>
+			<td><?php echo $this->formText("questionary[emails]", $this->info->emails) ?><em>V případě více emailů oddělujte čárkou</em></td>
+		</tr>
+		<tr>
+			<td><?php echo $this->formLabel("questionary[tags]", "Štítky:"); ?></td>
+			<td><?php echo $this->formText("questionary[tags]", $this->info->tags) ?></td>
+		</tr>
+		<tr>
+			<td><?php echo $this->formLabel("questionary[caption]", "Název vyplněného dotazníku z:")?></td>
+			<td>
+			<?php echo $this->formSelect("questionary[caption]"); ?>
+			</td>
+		</tr>
+		<tr>
+			<td><?php echo $this->formLabel("questionary[subcaption]", "Podnázev vyplněného dotazníku z:")?></td>
+			<td>
+			<?php echo $this->formSelect("questionary[subcaption]"); ?>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+			<?php 
+			echo $this->formHidden("questionary[id]]", $this->questionaryRow->id);
+			echo $this->formSubmit("questionary-edit-submit", "Uložit informace");
+			echo $this->formHidden("default-caption", $this->info->caption);
+			echo $this->formHidden("default-subcaption", $this->info->subcaption);
+			?>
+			</td>
+		</tr>
+		</table>
+	</form>
+	<h2>Smazat dotazník</h2>
+	<form action="/admin/deleteq" method="post" onsubmit="return confirm('Skutečně smazat dotazník?\nBudou smazány i vyplněná data');">
+		<p>
+			<?php 
+			echo $this->formLabel("delete[confirm]", "Skutečně smazat?"); 
+			echo $this->formCheckbox("delete[confirm]", 1);
+			?>
+		</p>
+		<p>
+			<?php 
+			echo $this->formSubmit("delete-submit", "Smazat dotazník", array("disabled" => "disabled")); 
+			echo $this->formHidden("delete[id]", $this->questionaryRow->id);
+			?>
+		</p>
+	</form>
+	<div id="questionary-item-container"></div><br /><br />
+</div>
+<div id="right" class="panel">
 	<h3>Prvky</h3>
 	<ul id="items"></ul>
+	<h3>Nepoužité prvky</h3>
+	<ul id="unused-items"></ul>
 </div>
 <script type="text/javascript" src="/js/admin/editq.js"></script>

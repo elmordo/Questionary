@@ -42,6 +42,34 @@ $(function() {
 			currentItem.addItem(item);
 		});
 	}
+    
+    function writeGridView(container) {
+        currentItem._showAdd = container.find("input[name='showAdd']").filter(":checked").length ? true : false;
+        currentItem._showDel = container.find("input[name='showDel']").filter(":checked").length ? true : false;
+        
+        currentItem._minRows = Number(container.find("input[name='minRows']").val());
+        
+        // zapis definic sloupcu
+        currentItem._columns = new Array();
+        currentItem._dataRows = new Array();
+        
+        container.find("ol li").each(function () {
+            var el = $(this);
+            var name = el.find("input[name='name']").val();
+            var caption = el.find("input[name='caption']").val();
+            var type = el.find("select").val();
+            
+            currentItem._columns.push({ name : name, caption : caption, type : type });
+        });
+    }
+
+    function writeCheckBox(container) {
+    	currentItem._checkedVal = container.find("input[name='checkedVal']").val();
+    	currentItem._checked = container.find("input[name='defaultChecked']:checked").length;
+
+    	currentItem._filledVal = null;
+    	currentItem._isFilled = false;
+    }
 	
 	function writeChanges() {
 		// zapis hodnot
@@ -51,6 +79,10 @@ $(function() {
 		
 		// vyhodnoceni prvku
 		switch (currentItem.className()) {
+		case "CheckBox":
+			writeCheckBox(dialog);
+			break;
+
 		case "Select":
 		case "Radio":
 		case "ValueList":
@@ -59,6 +91,11 @@ $(function() {
 			
 		case "Group":
 			writeContainer(dialog);
+			break;
+        
+        case "GridView":
+            writeGridView(dialog);
+            break;
 		}
 		
 		dialog.dialog("close");
@@ -77,6 +114,31 @@ $(function() {
 		questionary.setOrder(items);
 		
 		render();
+	}
+
+	function writeCheckBoxEdit(item, container) {
+		// policko pro zaskrnutou hodnotu
+		var checkedVal = $("<input type='text' name='checkedVal'>");
+		checkedVal.val(item._checkedVal);
+
+		$("<p>").appendTo(container).append(
+			$("<label>").text("Hodnota po zaškrtnutí")
+		).append(
+			checkedVal
+		);
+
+		// policko pro vychozi zaskrtnuti
+		var checked = $("<input type='checkbox' name='defaultChecked'>");
+
+		if (item._checked) {
+			checked.attr("checked", "checked");
+		}
+
+		$("<p>").appendTo(container).append(
+			$("<label>").text("Zaškrtnuté")
+		).append(
+			checked
+		);
 	}
 	
 	// zapise do kontejneru nastaveni ChooseInput
@@ -158,6 +220,57 @@ $(function() {
 			$("<span>").text(gItem.name()).appendTo(li);
 		}
 	}
+    
+    function writeGridViewEdit(item, container) {
+        var showDel = $("<input type='checkbox' name='showDel'>");
+        var showAdd = $("<input type='checkbox' name='showAdd'>");
+        
+        if (item._showDel) showDel.attr("checked", "checked");
+        if (item._showAdd) showAdd.attr("checked", "checked");
+        
+        // zapis zmeny viditelnosti tlacitek
+        $("<label>Zobrazovat tlačítko přidání:</label>").append(showAdd).appendTo($("<p />").appendTo(container));
+        $("<label>Zobrazovat tlačítko smazaní:</label>").append(showDel).appendTo($("<p />").appendTo(container));
+        
+        // zapis minimalniho poctu radku
+        $("<label>Minimální počet řádků:</label>").append(
+                $("<input type='text' name='minRows'>").val(item._minRows)
+                ).appendTo($("<p />").appendTo(container));
+        
+        // priprava vyberu sloupcu
+        var typeSelect = $("<select name='type'>")
+        	.append("<option value='text'>Text</option>")
+        	.append("<option value='hidden'>Skryté pole</option>")
+        	.append("<option value='const'>Konstantní hodnota</option>")
+        	.append("<option value='checkbox'>Zaškrtávací políčko</option>");
+
+        // zapis definice sloupci
+        var colContainer = $("<ol>").appendTo(container);
+        
+        // vygenerovani seznamu definic sloupcu
+        for (var i in item._columns) {
+            var col = item._columns[i];
+            
+            var colCont = $("<li>").appendTo(colContainer);
+            
+            $("<label>Interní jméno: </label>").append($("<input type='text' name='name'>").val(col.name)).appendTo($("<p>").appendTo(colCont));
+            $("<label>Popisek: </label>").append($("<input type='text' name='caption'>").val(col.caption)).appendTo($("<p>").appendTo(colCont));
+            $("<label>Typ: </label>").append(typeSelect.clone().val(col.type)).appendTo($("<p>").appendTo(colCont));
+            $("<input type='button' value='Odebrat'>").click(function () { $(this).parents("li:first").remove(); }).appendTo($("<p>").appendTo(colCont));
+        }
+        
+        colContainer.sortable();
+        
+        // tlacitko pridani elementu
+        $("<p>").append($("<input type='button' value='Přidat sloupec'>").click(function () {
+            var colCont = $("<li>").appendTo(colContainer);
+            
+            $("<label>Interní jméno: </label>").append($("<input type='text' name='name'>")).appendTo($("<p>").appendTo(colCont));
+            $("<label>Popisek: </label>").append($("<input type='text' name='caption'>")).appendTo($("<p>").appendTo(colCont));
+            $("<label>Typ: </label>").append(typeSelect.clone()).appendTo($("<p>").appendTo(colCont));
+            $("<input type='button' value='Odebrat'>").click(function () { $(this).parents("li:first").remove(); }).appendTo($("<p>").appendTo(colCont));
+        })).appendTo(container);
+    }
 	
 	// zobrazi dialog pro editaci dat
 	function showEdit() {
@@ -198,6 +311,11 @@ $(function() {
 		
 		// vyhodnoceni tridy
 		switch (item.className()) {
+		case "CheckBox":
+			var specContainer = $("<fieldset id='specific'>").append($("<legend>").text("Nastavení zaškrtávacího políčka")).appendTo(container);
+			writeCheckBoxEdit(item, specContainer);
+			break;
+
 		case "Radio":
 		case "Select":
 		case "ValueList":
@@ -213,9 +331,16 @@ $(function() {
 			var specContainer = $("<fieldset id='specific'>").append($("<legend>").text("Nastavení výběru")).appendTo(container);
 			writeContainerEdit(item, specContainer);
 			break;
+        
+        case "GridView":
+            var specContainer = $("<fieldset id='specific'>").append($("<legend>").text("Nastavení tabulky")).appendTo(container);
+            writeGridViewEdit(item, specContainer);
+            break;
 		}
 		
 		$("<input type='button' value='Zapsat změny'>").click(writeChanges).appendTo(container);
+		$("<br>").appendTo(container);
+		$("<input type='button' value='Odstranit'>").click(deleteItem).appendTo(container);
 		
 		dialog.dialog({
 			modal: true,
@@ -226,6 +351,17 @@ $(function() {
 				dialog.remove();
 			}
 		});
+	}
+	
+	// snaze prvek
+	function deleteItem() {
+		if (!confirm("Skutečně odstranit prvek?"))
+			return;
+		
+		questionary.removeItem(currentItem);
+		dialog.dialog("close");
+		render();
+		refreshItems();
 	}
 	
 	// zmeni viditelnost prvku
@@ -292,13 +428,14 @@ $(function() {
 		
 		var data = {
 			questionary : {
-				content: arr,
-				id : id
+				content: window.JSON.stringify(arr),
+				id : id,
+                format : "json"
 			}
 		};
 		
 		$.post("/questionary/admin/put.json", data, function (response) {
-			
+            confirm("Data byla uložena");
 		}, "json");
 		
 		return false;

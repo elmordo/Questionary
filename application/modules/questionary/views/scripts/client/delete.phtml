@@ -1,0 +1,3 @@
+<?php
+$redirector = new Zend_Controller_Action_Helper_Redirector();
+$redirector->gotoUrlAndExit($_SERVER["HTTP_REFERER"]);

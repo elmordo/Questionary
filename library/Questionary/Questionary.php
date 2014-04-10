@@ -1,6 +1,6 @@
 <?php
 class Questionary_Questionary {
-	
+
 	/**
 	 * pole prvku formulare
 	 * klicem je jmeno prvku
@@ -80,7 +80,7 @@ class Questionary_Questionary {
 
 		return $this->_itemIndex[$name];
 	}
-	
+
 	/**
 	 * vraci index vsech prvku
 	 * 
@@ -210,7 +210,7 @@ class Questionary_Questionary {
 		
 		return $this;
 	}
-	
+
 	/**
 	 * nastavi uzamceni dotazniku
 	 * 

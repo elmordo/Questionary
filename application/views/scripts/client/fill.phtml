@@ -9,7 +9,7 @@ echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());
 		<div id="questionary-controll">
 			<p>
 				<?php 
-				echo $this->formSubmit("questionary-submit", "Odeslat dotazník");
+				echo $this->formSubmit("questionary-submit", "Odeslat");
 				echo $this->formHidden("questionary-filled-key", $this->trans->key);
 				?>
 			</p>

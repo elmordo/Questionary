@@ -3,15 +3,29 @@
 echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());
 ?>
 </script>
+<?php
+// vygenerovani parametru
+$params = array();
+
+foreach ($this->params as $key => $val) {
+	$params[] = sprintf("params[%s]=%s", $key, $val);
+}
+
+if ($params) {
+	$strParams = "?" . implode("&", $params);
+} else {
+	$strParams = "";
+}
+?>
 <div class="questionary-container">
-	<form action="/questionary/client/save" method="post" class="questionary-form" id="<?php echo $this->formId; ?>">
+	<form action="/questionary/client/save<?php echo $strParams; ?>" method="post" class="questionary-form" id="<?php echo $this->formId; ?>">
 		<div id="questionary-content"></div>
 		<div id="questionary-controll">
 			<p>
 				<?php 
-				echo $this->formReset("questionary-reset", "Obnovit hodnoty");
-				echo $this->formSubmit("questionary-submit", "Odeslat dotazník");
-				echo $this->formSubmit("questionary-save", "Uložit hodnoty");
+				if ($this->buttons["reset"]) echo $this->formReset("questionary-reset", "Obnovit hodnoty");
+				if ($this->buttons["submit"]) echo $this->formSubmit("questionary-submit", "Odeslat dotazník");
+				if ($this->buttons["save"]) echo $this->formSubmit("questionary-save", "Uložit hodnoty");
 				echo $this->formHidden("questionary-filled-id", $this->filled->id);
 				?>
 			</p>

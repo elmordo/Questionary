@@ -1,21 +1,66 @@
 <a href="/admin/index/index">Zpět na hlavní stranu</a>
 <h1>Seznam dotazníků</h1>
-<ul>
+<table class="qlist">
+	<thead>
+		<tr>
+			<th>Jméno</th>
+			<th>Štítky</th>
+			<th>Akce</th>
+		</tr>
+	</thead>
+	<tbody>
 	<?php
 	foreach ($this->own as $item) {
 		?>
-	<li>
-		<a href="/admin/editq?questionary[id]=<?php echo $item["questionary"]->id; ?>">
-			<?php echo $item["questionary"]->name; ?>
-		</a>
-		(<a href="/admin/filledlist?questionary[id]=<?php echo $item["questionary"]->id; ?>">
-			Zobrazit vyplněné
-		</a>)
-	</li>
+		<tr>
+			<td>
+				<a href="/admin/editq?questionary[id]=<?php echo $item["questionary"]->id; ?>">
+					<?php echo $item["questionary"]->name; ?>
+				</a>
+			</td>
+			<td>
+			<?php echo $item["info"]->tags; ?>
+			</td>
+			<td>
+				<a href="/admin/filledlist?questionary[id]=<?php echo $item["questionary"]->id; ?>">
+					Zobrazit vyplněné
+				</a>
+			</td>
+		</tr>
 		<?php
 	}
 	?>
-</ul>
+	</tbody>
+</table>
+<h2>Klonovat dotazník</h2>
+<form action="/admin/clone" method="post">
+	<p>
+		<?php 
+		// vygenerovani seznamu dotazniku
+		$list = array();
+		
+		foreach ($this->own as $item) {
+			$list[$item["questionary"]->id] = $item["questionary"]->name;
+		}
+		
+		foreach ($this->other as $item) {
+			$list[$item["questionary"]->id] = $item["questionary"]->name;
+		}
+		
+		echo $this->formLabel("clone[id]", "Dotazník:");
+		echo $this->formSelect("clone[id]", null, null, $list);
+		?>
+	</p>
+	<p>
+		<?php 
+		echo $this->formLabel("clone[name]", "Jméno nového dotazníku:");
+		echo $this->formText("clone[name]");
+		?>
+	</p>
+	<p>
+		<?php echo $this->formSubmit("clone[submit]", "Klonovat"); ?>
+	</p>
+</form>
 <?php
 // pokud cizi dotazniky nejsou dostupne, ukonci se zpracovani
 if (!$this->other->count()) return;

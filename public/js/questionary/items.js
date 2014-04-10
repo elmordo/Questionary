@@ -1,87 +1,99 @@
 var QUESTIONARY = {
 		"__EXTENDS__" : function (parent, child) {
-			var F = function () {};
-			
-			F.prototype = parent.prototype;
-			
-			child.prototype = new F();
+			child.prototype = new parent();
 			child.prototype.__SUPER__ = parent.prototype;
 		},
 	
-		"__BASE__" : function (name) {
+		"__BASE__" : (function __BASE__ (name) {
 			// kontrola jmena
 			this._name = name;
 			
 			// nastaveni dotazniku resi trida Questionary
-		},
+		}),
 		
-		"Questionary" : function () {
+		"Questionary" : (function Questionary () {
 			// znovuvytvoreni objektu
 			this._itemIndex = {};
 			this._items = new Array();
-		},
+		}),
 		
-		"Container" : function (name) {
+		"Container" : (function Container (name) {
 			this._items = new Array();
 			
 			QUESTIONARY.__BASE__.call(this, name);
 			
 			this._className = "Container";
-		},
+		}),
 		
-		"ChooseInput" : function (name) {
+		"ChooseInput" : (function ChooseInput (name) {
 			this._options = new Array();
 			
 			QUESTIONARY.__BASE__.call(this, name);
-		},
+		}),
 		
-		"SingleInput" : function (name) {
+		"SingleInput" : (function SingleInput (name) {
 			QUESTIONARY.__BASE__.call(this, name);
 			
 			this._className = "SingleInput";
-		},
+		}),
 		
-		"Label" : function (name) {
+		"Label" : (function Label (name) {
 			QUESTIONARY.__BASE__.call(this, name);
 			
 			this._className = "Label";
-		},
+		}),
 		
-		"Text" : function (name) {
+		"Text" : (function Radio (name) {
 			QUESTIONARY.SingleInput.call(this, name);
 			
 			this._className = "Text";
-		},
+		}),
 		
-		"TextArea" : function (name) {
+		"TextArea" : (function TextArea (name) {
 			QUESTIONARY.SingleInput.call(this, name);
 			
 			this._className = "TextArea";
-		},
+		}),
+
+		"CheckBox" : (function CheckBox (name) {
+			QUESTIONARY.SingleInput.call(this, name);
+
+			this._className = "CheckBox";
+		}),
 		
-		"Select" : function (name) {
+		"Select" : (function Select (name) {
 			QUESTIONARY.ChooseInput.call(this, name);
 			
 			this._className = "Select";
-		},
+		}),
 		
-		"Radio" : function (name) {
+		"Radio" : (function Radio (name) {
 			QUESTIONARY.ChooseInput.call(this, name);
 			
 			this._className = "Radio";
-		},
+		}),
 		
-		"ValueList" : function (name) {
+		"ValueList" : (function ValueList (name) {
 			QUESTIONARY.ChooseInput.call(this, name);
 			
 			this._className = "ValueList";
-		},
+		}),
 		
-		"Group" : function (name) {
+		"Group" : (function Group (name) {
 			QUESTIONARY.Container.call(this, name);
 			
 			this._className = "Group";
-		}
+		}),
+                
+        "GridView" : (function GridView (name) {
+            QUESTIONARY.__BASE__.call(this, name);
+            this._filledVal = new Array();
+            this._default = new Array();
+            
+            this._className = "GridView";
+            
+            x = this;
+        })
 };
 
 /*
@@ -122,7 +134,7 @@ QUESTIONARY.__BASE__.prototype._getOrSet = function (valName, value) {
 	if (this[valName] === undefined) throw "Value " + valName + " is unknown";
 	
 	// vyhodnoceni hodnoty
-	if (value == undefined) {
+	if (value === undefined) {
 		// pozadavek na GET
 		return this[valName];
 	} else {
@@ -213,9 +225,51 @@ QUESTIONARY.__BASE__.prototype.name = function () {
 	return this._name;
 };
 
+// vraci prvek, ktery se bude renderovat nasledne
+QUESTIONARY.__BASE__.prototype.prev = function () {
+	// prvek muze byt umisten v kontejneru - musi se to brat v potaz
+	var items = this._getParentsItems();
+	
+	// nyni se prochazeji prvky a vyhodnocuje se nasledujici prvek
+	for (var i in items) {
+		if (items[i] === this) {
+			// nasli jsme nas prvek, nyni vyhodnotime pozici
+			if (i === (items.length - 1)) {
+				// pred prvek neni zadny jiny prvek
+				return null;
+			}
+			
+			return items[i + 1];
+		}
+	}
+	
+	return null;
+};
+
 // vraci objekt rodicovskeho dotazniku
 QUESTIONARY.__BASE__.prototype.questionary = function () {
 	return this._questionary;
+};
+
+//vraci predchozi prvek v poradi renderu
+QUESTIONARY.__BASE__.prototype.prev = function () {
+	// prvek muze byt umisten v kontejneru - musi se to brat v potaz
+	var items = this._getParentsItems();
+	
+	// nyni se prochazeji prvky a vyhodnocuje se nasledujici prvek
+	for (var i in items) {
+		if (items[i] === this) {
+			// nasli jsme nas prvek, nyni vyhodnotime pozici
+			if (i === 0) {
+				// pred prvek neni zadny jiny prvek
+				return null;
+			}
+			
+			return items[i - 1];
+		}
+	}
+	
+	return null;
 };
 
 QUESTIONARY.__BASE__.prototype.renderItem = function () {
@@ -272,6 +326,15 @@ QUESTIONARY.__BASE__.prototype._clearContainer = function () {
 	return this;
 };
 
+// vraci seznam renderovacich prvku nadrazeneho elementu (dotaznik nebo kontejner)
+QUESTIONARY.__BASE__.prototype._getParentsItems = function () {
+	if (this.container()) {
+		return this.container().getItems();
+	} else {
+		return this.questionary().getItems();
+	}
+};
+
 // vypocita velikosti prvku
 QUESTIONARY.__BASE__.prototype._recalculateHeight = function () {
 	// nacteni prvku
@@ -325,14 +388,14 @@ QUESTIONARY.Questionary.prototype._items = new Array();
 // vytvori novy prvek (staticka trida)
 QUESTIONARY.Questionary.factory = function (name, className, questionary) {
 	// kontrola dat
-	if (QUESTIONARY[className] == undefined) throw "Item class " + className + " does not exist";
+	if (QUESTIONARY[className] === undefined) throw "Item class " + className + " does not exist";
 	if (!(questionary instanceof QUESTIONARY.Questionary)) throw "Invalid class of parent questionary";
 	
 	// kontrola jmena
-	if (questionary._itemIndex[name] != undefined) throw "Item named " + name + "is already existing";
+	if (questionary._itemIndex[name] !== undefined) throw "Item named " + name + "is already existing";
 	
 	// vytvoreni itemu
-	var item = new QUESTIONARY[className](name);
+	var item = new (QUESTIONARY[className])(name);
 	
 	// nastaveni dotazniku
 	item._questionary = questionary;
@@ -353,7 +416,7 @@ QUESTIONARY.Questionary.prototype.addItem = function (name, className) {
 // vraci prvek podle jmena
 QUESTIONARY.Questionary.prototype.getByName = function (name) {
 	// kontrola existence
-	if (this._itemIndex[name] == undefined) throw "Item named " + name + " is not existing in this questionary";
+	if (this._itemIndex[name] === undefined) throw "Item named " + name + " is not existing in this questionary";
 	
 	return this._itemIndex[name];
 };
@@ -417,7 +480,7 @@ QUESTIONARY.Questionary.prototype.getRenderable = function (item) {
 	// iterace nad itemy a kontrola instance
 	for (var i in this._items) {
 		// kontrola stejne instance
-		retVal = item == this._items[i];
+		retVal = item === this._items[i];
 		
 		// pokud instance byla nalezena, ukonci se pruchod polem
 		if (retVal) break;
@@ -456,7 +519,7 @@ QUESTIONARY.Questionary.prototype.setLocked = function (locked) {
 // odebere prvek z dotazniku
 QUESTIONARY.Questionary.prototype.removeItem = function (item) {
 	// kontrola, jeslti je prvek soucasti tohoto dotazniku
-	if (item.questionary() != this) throw "Item is not part of this questionary";
+	if (item.questionary() !== this) throw "Item is not part of this questionary";
 	
 	// kontrola prislusnosti ke kontejneru
 	if (item.container()) {
@@ -470,7 +533,7 @@ QUESTIONARY.Questionary.prototype.removeItem = function (item) {
 	
 	for (i in this._items) {
 		// pokud zpracovavany objekt neni odebirany, zapise se noveho pole
-		if (this._items[i] != item) {
+		if (this._items[i] !== item) {
 			newItems.push(this._items[i]);
 		}
 	}
@@ -482,7 +545,7 @@ QUESTIONARY.Questionary.prototype.removeItem = function (item) {
 	
 	for (i in this._itemIndex) {
 		// pokud zpracovavany objekt neni odebirany, zapise se do noveho indexu
-		if (this._itemIndex[i] != item) {
+		if (this._itemIndex[i] !== item) {
 			newIndex[i] = this._itemIndex[i];
 		}
 	}
@@ -571,7 +634,7 @@ QUESTIONARY.Questionary.prototype.setName = function (name) {
 // nebo ho vyradi uplne z renderovani
 QUESTIONARY.Questionary.prototype.setRenderable = function (item, renderable) {
 	// kontrola, jestli je objekt soucasti tohoto dotazniku
-	if (item.questionary() != this) throw "Item is not part of this questionary";
+	if (item.questionary() !== this) throw "Item is not part of this questionary";
 	
 	// pokud je item soucasti kontejneru, odebere se
 	if (item.container()) {
@@ -583,7 +646,7 @@ QUESTIONARY.Questionary.prototype.setRenderable = function (item, renderable) {
 	
 	for (var i in this._items) {
 		// pokud zpracovavany prvek neni nastavovany, prida se do tempu
-		if (this._items[i] != item) {
+		if (this._items[i] !== item) {
 			newItems.push(this._items[i]);
 		}
 	}
@@ -608,7 +671,7 @@ QUESTIONARY.Questionary.prototype.setOrder = function(items) {
 		var item = items[i];
 		
 		// kontrola dotazniku
-		if (item.questionary() != this) throw "Item on index " + i + " has wrong instance of questionary";
+		if (item.questionary() !== this) throw "Item on index " + i + " has wrong instance of questionary";
 		
 		// kontrola kontejneru a pripadne odebrani z nej
 		if (item.container()) item.container().removeItem(item);
@@ -649,6 +712,9 @@ QUESTIONARY.Questionary.prototype.toArray = function () {
 
 // dedeni
 QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.Container);
+
+// jmeno tridy
+QUESTIONARY.Container.prototype._className = "Container";
 
 // seznam prvku
 QUESTIONARY.Container.prototype._items = new Array();
@@ -698,7 +764,7 @@ QUESTIONARY.Container.prototype.removeItem = function (item) {
 	
 	for (var i in this._items) {
 		// kontrola jeslti se jedna o spravny prvek
-		if (item == this._items[i]) {
+		if (item === this._items[i]) {
 			found = true;
 		} else {
 			newList.push(this._items[i]);
@@ -731,6 +797,17 @@ QUESTIONARY.Container.prototype.setFromArray = function(data) {
 	return this;
 };
 
+// nastavi prvky z pole
+QUESTIONARY.Container.prototype.setItems = function (items) {
+	this.clear();
+	
+	for (var i in items) {
+		this.addItem(items[i]);
+	}
+	
+	return this;
+};
+
 // serializuje skupinu do pole
 QUESTIONARY.Container.prototype.toArray = function () {
 	var retVal = QUESTIONARY.__BASE__.prototype.toArray.call(this);
@@ -750,6 +827,11 @@ QUESTIONARY.Container.prototype.toArray = function () {
  */
 
 QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.ChooseInput);
+
+QUESTIONARY.ChooseInput.prototype._className = "ChooseInput";
+
+// jmeno tridy
+QUESTIONARY.Container.prototype._className = "ChooseInfo";
 
 // seznam moznosti
 QUESTIONARY.ChooseInput.prototype._options = new Array();
@@ -787,14 +869,14 @@ QUESTIONARY.ChooseInput.prototype.getOptions = function () {
 // vraci hodnotu
 QUESTIONARY.ChooseInput.prototype.getOption = function (name) {
 	// kontrola existence
-	if (this._options[name] == undefined) throw "Option named '" + name + "' doesn't exist";
+	if (this._options[name] === undefined) throw "Option named '" + name + "' doesn't exist";
 	
 	return this._options[name];
 };
 
 // vraci TRUE, pokud je moznost definovana
 QUESTIONARY.ChooseInput.prototype.isOption = function (name) {
-	return (this._options[name] == undefined) ? false : true;
+	return (this._options[name] === undefined) ? false : true;
 };
 
 // odebere moznost ze seznamu
@@ -805,7 +887,7 @@ QUESTIONARY.ChooseInput.prototype.removeOption = function (name) {
 	
 	for (var i in this._options) {
 		// vyhodnoceni, jeslti se jedna o hledany prvek
-		if (i != name) {
+		if (i !== name) {
 			buffer[i] = this._options[i];
 		} else {
 			found = true;
@@ -868,6 +950,10 @@ QUESTIONARY.ChooseInput.prototype.toArray = function () {
 
 QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.SingleInput);
 
+// jmeno tridy
+QUESTIONARY.SingleInput.prototype._className = "SingleInput";
+
+// maximalni delka
 QUESTIONARY.SingleInput.prototype._maxLength = 0;
 
 // vraci delku vstupu
@@ -888,7 +974,7 @@ QUESTIONARY.SingleInput.prototype.setFromArray = function (data) {
 QUESTIONARY.SingleInput.prototype.setLength = function(length) {
 	length = Number(length);
 	
-	if (length == NaN) throw "Length must be number";
+	if (length === NaN) throw "Length must be number";
 	
 	this._maxLength = length;
 };
@@ -908,9 +994,11 @@ QUESTIONARY.SingleInput.prototype.toArray = function () {
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.Label);
 
+QUESTIONARY.Label.prototype._className = "Label";
+
 QUESTIONARY.Label.prototype._recalculateHeight = function () {
 	
-}
+};
 
 QUESTIONARY.Label.prototype.renderItem = function () {
 	var retVal = QUESTIONARY.__BASE__.prototype.renderItem.call(this);
@@ -931,6 +1019,8 @@ QUESTIONARY.Label.prototype.toArray = function () {
  */
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.Text);
+
+QUESTIONARY.Text.prototype._className = "Text";
 
 // inicializuje prvek
 QUESTIONARY.Text.prototype.init = function (node) {
@@ -975,6 +1065,8 @@ QUESTIONARY.Text.prototype.toArray = function () {
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.TextArea);
 
+QUESTIONARY.TextArea.prototype._className = "TextArea";
+
 // inicializuje prvek
 QUESTIONARY.TextArea.prototype.init = function (node) {
 	QUESTIONARY.SingleInput.prototype.init.call(this, node);
@@ -999,7 +1091,7 @@ QUESTIONARY.TextArea.prototype.renderItem = function () {
 	
 	var val = this.getValue();
 	
-	if (val != null) content.val(val);
+	if (val !== null) content.val(val);
 	
 	this.init(retVal);
 	
@@ -1017,6 +1109,8 @@ QUESTIONARY.TextArea.prototype.toArray = function () {
  */
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.ChooseInput, QUESTIONARY.Select);
+
+QUESTIONARY.Select.prototype._className = "Select";
 
 // inicializuje objekt 
 QUESTIONARY.Select.prototype.init = function (node) {
@@ -1043,7 +1137,7 @@ QUESTIONARY.Select.prototype.renderItem = function () {
 		$("<option>").attr("value", i).text(this._options[i]).appendTo(content);
 	}
 	
-	if (val != null) content.val(val);
+	if (val !== null) content.val(val);
 	
 	content.appendTo(retVal.find(".questionary-content"));
 
@@ -1063,6 +1157,8 @@ QUESTIONARY.Select.prototype.toArray = function () {
  */
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.ChooseInput, QUESTIONARY.Radio);
+
+QUESTIONARY.Radio.prototype._className = "Radio";
 
 QUESTIONARY.Radio.prototype.init = function (node) {
 	// inicializace celeho itemu
@@ -1098,7 +1194,7 @@ QUESTIONARY.Radio.prototype.renderItem = function () {
 			.attr("title", this._options[i]).appendTo(span);
 		
 		// vyhodnoceni zaskrtnuti
-		if (i == val) input.attr("checked", "checked");
+		if (i === val) input.attr("checked", "checked");
 	}
 	
 	content.appendTo(retVal.find(".questionary-content"));
@@ -1120,6 +1216,8 @@ QUESTIONARY.Radio.prototype.toArray = function () {
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.ChooseInput, QUESTIONARY.ValueList);
 
+QUESTIONARY.ValueList.prototype._className = "ValueList";
+
 QUESTIONARY.ValueList.prototype.init = function (node) {
 	// inicializace celeho itemu
 	QUESTIONARY.ChooseInput.prototype.init.call(this, node);
@@ -1139,7 +1237,7 @@ QUESTIONARY.ValueList.prototype.renderItem = function () {
 	// zapis moznosti
 	for (var i in this._options) {
 		//var span = $("<span class='questionary-item-valuelist-item'>").text(this._options[i]);
-                var span = $("<span>").addClass("questionary-item-valuelist-item").appendTo(content).text(this._options[i]);
+        var span = $("<span>").addClass("questionary-item-valuelist-item").appendTo(content).text(this._options[i]);
                 
 	}
 	
@@ -1162,6 +1260,8 @@ QUESTIONARY.ValueList.prototype.toArray = function () {
  
 QUESTIONARY.__EXTENDS__(QUESTIONARY.Container, QUESTIONARY.Group);
 
+QUESTIONARY.Group.prototype._className = "Group";
+
 QUESTIONARY.Group.prototype.init = function (node) {
 	// zavolani inicializace predka
 	QUESTIONARY.Container.prototype.init.call(this, node);
@@ -1171,7 +1271,7 @@ QUESTIONARY.Group.prototype.init = function (node) {
 	
 	node.find("span.questionary-item-group-chekbox :checkbox").click(function (e) {
 		var check = $(this);
-		var checked = check.attr("checked");
+		var checked = check.filter(":checked").length;
 		var content = node.find(".questionary-item-group");
 		
 		if (checked) {
@@ -1234,7 +1334,7 @@ QUESTIONARY.Group.prototype.renderItem = function () {
 	// nastaveni hodnoty
 	var val = this.getValue();
 	
-	if (val !== null && Number(val) == 0) {
+	if (val !== null && Number(val) === 0) {
 		check.removeAttr("checked");
 		content.hide();
 	}
@@ -1248,4 +1348,323 @@ QUESTIONARY.Group.prototype.toArray = function () {
 	var retVal = QUESTIONARY.Container.prototype.toArray.call(this);
 	
 	return retVal;
+};
+
+/*
+ * PRVEK GridView
+ */
+
+QUESTIONARY.__EXTENDS__(QUESTIONARY.__BASE__, QUESTIONARY.GridView);
+
+// minimalni pocet radku, ktere se zobrazi
+QUESTIONARY.GridView.prototype._minRows = 1;
+
+// definice sloupcu
+QUESTIONARY.GridView.prototype._columns = new Array(
+        { caption : "Hodnota", name : "value", type : "text"}
+);
+
+// prepinac umoznujici zobrazit / skryt tlactko pridani radku
+QUESTIONARY.GridView.prototype._showAdd = true;
+
+// prepinac umoznujici zobrazit / skrit tlacitko odebrani radku
+QUESTIONARY.GridView.prototype._showDel = true;
+
+QUESTIONARY.GridView.prototype.init = function (node) {
+    QUESTIONARY.__BASE__.prototype.init.call(this, node);
+    
+    // event smazani dat
+    var context = this;
+    
+    node.find("table button").click(function () {
+        var element = $(this);
+        var index = element.parents("tr:first").index();
+        
+        $(this).parents("tr:first").remove();
+        
+        // odebrani indexu z dat
+        var newList = new Array();
+        
+        for (var i in context._rowData) {
+            if (i !== index) {
+                newList.push(context._filledVal[i]);
+            }
+        }
+        
+        context._filledVal = newList;
+    });
+    
+    node.find("table").find("input[type='text']").change(this._changeEvent());
+    
+    node.find("button[name='add']").click(function () {
+        var row = context._generateEmptyRow();
+        var index = context._filledVal.length;
+        context._filledVal.push(row);
+        
+        var rowNode = context._generateRow(row, index);
+        rowNode.find("input[type='text']").change(context._changeEvent());
+        
+        context._node.find("table").append(rowNode);
+    });
+};
+
+QUESTIONARY.GridView.prototype.renderItem = function () {
+    var retVal = QUESTIONARY.__BASE__.prototype.renderItem.call(this);
+    
+    // prepis trid
+    retVal.find(".questionary-label").addClass("questionary-item-gw-label");
+    
+    var contentWrapper = retVal.find(".questionary-content");
+    contentWrapper.addClass("questionary-item-gw-content");
+    
+    // vygenerovani tabulky pro append
+    var table = $("<table />").appendTo(contentWrapper);
+    var headRow = $("<tr />").appendTo($("<thead />").appendTo(table));
+    
+    for (var i in this._columns) {
+        var col = this._columns[i];
+
+        // kontrola, zda se nejdena o skrytou hodnotu
+        if (col.type !== "hidden") {
+	        headRow.append(
+	            $("<th>").text(col.caption)
+	        );
+    	}
+    }
+    
+    if (this._showDel) {
+        headRow.append($("<th class='questionary-item-gw-delcol'>").html("&nbsp;"));
+    }
+    
+    // doplneni prazdnych hodnot, pokud neni dost dat
+    for (var i = this._filledVal.length; i < this._minRows; i++) {
+        this._filledVal.push(this._generateEmptyRow());
+    }
+    
+    // vygenerovani datovych radku
+    for (var i in this._filledVal) {
+        var row = this._filledVal[i];
+        
+        table.append(this._generateRow(row, i));
+    }
+    
+    if (this._showAdd) {
+        // pridani tlacika k vytvoreni noveho radku
+        $("<button type='button' name='add'>Přidat řádek</button>").appendTo(contentWrapper);
+    }
+    
+    this.init(retVal);
+    
+    return retVal;
+};
+
+QUESTIONARY.GridView.prototype.setFromArray = function (data) {
+    QUESTIONARY.__BASE__.prototype.setFromArray.call(this, data);
+    
+    if (this._filledVal === null) {
+        this._filledVal = this._default;
+    }
+    
+    this._minRows = Number(data.params.minRows);
+    this._columns = data.params.columns;
+    this._showDel = data.params.showDel;
+    this._showAdd = data.params.showAdd;
+};
+
+QUESTIONARY.GridView.prototype.toArray = function () {
+    var retVal = QUESTIONARY.__BASE__.prototype.toArray.call(this);
+    
+    retVal.default = this._filledVal;
+    retVal.params.columns = this._columns;
+    retVal.params.minRows = this._minRows;
+    retVal.params.showDel = this._showDel;
+    retVal.params.showAdd = this._showAdd;
+    
+    return retVal;
+};
+
+// vygeneruje radek na zaklade dodanych dat
+QUESTIONARY.GridView.prototype._generateRow = function (data, index) {
+    // priprava navratove hodnoty
+    var retVal = $("<tr />");
+    
+    // pokud nejsou nastavena data, vygeneruje se prazdne pole
+    if (data === undefined) {
+        data = new Array();
+        
+        for (i in this._columns) {
+        	var col = this._columns[i];
+            data[col.name] = "";
+        }
+    }
+    
+    // vygenerovani dat
+    for (var i in this._columns) {
+        // vygenerovani prvku
+        var element = null;
+        var col = this._columns[i];
+        var visible=true;
+
+        switch (col.type) {
+            case "text":
+                element = $("<input type='text' />").attr("name", this._name + "[" + index + "][" + col.name + "]");
+                break;
+            
+            case "hidden":
+            	element = $("<input type='hidden' />").attr("name", this._name + "[" + index + "][" + col.name + "]");
+            	visible = false;
+            	break;
+
+            case "const":
+            	element = $("<span>").text(data[col.name]);
+            	var helper = $("<input type='hidden' />").attr("name", this._name + "[" + index + "][" + col.name + "]");
+            	helper.val(data[col.name]);
+            	element.append(helper);
+            	break;
+
+            case "checkbox":
+            	var chBox = $("<input type='checkbox' value='1'>").attr("name", this._name + "[" + index + "][" + col.name + "]");
+
+            	// kontrola zaskrtnuti
+            	if (Number(data[col.name]) == 1) chBox.attr("checked", "checked");
+
+            	element = $("<span>").append(
+            		// hodnota pri nezaskrtnuti
+            		$("<input type='hidden' value='0' />").attr("name", this._name + "[" + index + "][" + col.name + "]")
+            	).append(
+            		chBox
+            	);
+            	break;
+
+            default:
+                throw "Unsupported column type";
+        }
+
+        // zapis dat a zarazeni do radku
+        element.val(data[col.name]);
+
+        var td = $("<td>").append(element).appendTo(retVal);
+
+        if (!visible) td.css("display", "none");
+    }
+    
+    // kontrola, zda se ma pridat tlacitko smazani
+    if (this._showDel) {
+        var btn = $("<button type='button'>Smazat</button>").appendTo(retVal);
+    }
+    
+    return retVal;
+};
+
+// vygeneruje prazdna data radku
+QUESTIONARY.GridView.prototype._generateEmptyRow = function () {
+    var retVal = new Array();
+    
+    for (var i in this._columns) {
+        retVal.push("");
+    }
+    
+    return retVal;
+};
+
+// prepisuje funkci nastaveni vysky popisku
+QUESTIONARY.GridView.prototype._recalculateHeight = function () {
+    
+};
+
+QUESTIONARY.GridView.prototype._changeEvent = function () {
+    var context = this;
+    
+    return function (e) {
+        // zjisteni pozice
+        context._isFilled = true;
+        
+        var element = $(this);
+        var colIndex = element.parents("td:first").index();
+        var rowIndex = element.parents("tr:first").index();
+        
+        // zapis informace
+        context._filledVal[rowIndex][colIndex] = element.val();
+    };
+};
+
+/**
+ * PRVEK CheckBox
+ */
+
+QUESTIONARY.__EXTENDS__(QUESTIONARY.SingleInput, QUESTIONARY.CheckBox);
+
+/**
+ * prepinac, zda bude tlacitko po vykresleni zaskrtnuto
+ */
+QUESTIONARY.CheckBox.prototype._checked=0;
+
+/**
+ * hodnota zaskrtnuteho tlacitka
+ */
+QUESTIONARY.CheckBox.prototype._checkedVal="1";
+
+/**
+ * inicializuje prvek
+ */
+QUESTIONARY.CheckBox.prototype.init = function (node) {
+	var context = this;
+
+	node.find(":checkbox").click(function () {
+		if ($(this).filter(":checked").length) {
+			// policko je zaskrtnute
+			context._filledVal = context._checkedVal;
+		} else {
+			// policko neni zaskrtnute
+			context._filledVal = context._default;
+		}
+
+		context._isFilled = true;
+	});
+}
+
+/**
+ * metoda vykresleni
+ */
+QUESTIONARY.CheckBox.prototype.renderItem = function () {
+	this._default = "0";
+	var retVal = this.__SUPER__.renderItem.call(this);
+
+	// vygenerovani zaskrtavaciho policka a jeho vychozi hodnoty
+	var def = $("<input type='hidden'>").attr("name", this._name).val(this._default);
+	var box = $("<input type='checkbox'>").attr("name", this._name).val(this._checkedVal);
+
+	// vyhodnoceni vychozi hodnoty
+	if (this._filledVal === this._checkedVal) box.attr("checked", "checked");
+	
+	retVal.find(".questionary-content").append(def).append(box);
+
+	// inicializace prvku
+	this.init(retVal);
+
+	return retVal;
+}
+
+/**
+ * deserializace
+ */
+QUESTIONARY.CheckBox.prototype.setFromArray = function (data) {
+    QUESTIONARY.__BASE__.prototype.setFromArray.call(this, data);
+
+    this._default = "0";
+    
+    this._checked = Number(data.params.checked);
+    this._checkedVal = data.params.checkedVal;
+};
+
+/**
+ * serializace
+ */
+QUESTIONARY.CheckBox.prototype.toArray = function () {
+    var retVal = QUESTIONARY.__BASE__.prototype.toArray.call(this);
+    
+    retVal.params.checked = this._checked;
+    retVal.params.checkedVal = this._checkedVal;
+    
+    return retVal;
 };

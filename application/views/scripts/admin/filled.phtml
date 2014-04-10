@@ -1,4 +1,26 @@
-<a href="/admin/filledlist?questionary[id]=<?php echo $this->filled->questionary_id; ?>">Zpět na seznam</a>
+<p>
+	<a href="/admin/filledlist?questionary[id]=<?php echo $this->filled->questionary_id; ?>">Zpět na seznam</a>
+</p>
+<?php 
+if ($this->filledRow) {
+	?>
+<p>
+Verze dotazníku pro tisk: <?php 
+$href = "http://" . $_SERVER["SERVER_NAME"] . "/client/print?key=" . $this->filledRow->key;
+
+echo "<a href='$href' target='_blank'>$href</a>";
+?>
+</p>
+	<?php 
+}
+?>
+<form action="/admin/deletef" method="post" onsubmit="if ($('#delete-confirm:checked').length) return true; else { alert('Smazání musíte potvrdit'); return false; }">
+	<?php 
+	echo $this->formCheckbox("delete[confirm]", 1);
+	echo $this->formSubmit("delete[submit]", "Smazat dotazník");
+	echo $this->formHidden("delete[id]", $this->filled->id);
+	?>
+</form>
 <script type="text/javascript">
 <?php
 echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());

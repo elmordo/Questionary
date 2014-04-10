@@ -1,0 +1,14 @@
+<?php
+$redirector = new Zend_Controller_Action_Helper_Redirector();
+
+$url = "/questionary/client/fill?filled[id]=" . $this->filled->id;
+
+$parts = array($url);
+
+foreach ($this->params as $key => $val) {
+	$parts[] = "params[$key]=$val";
+}
+
+$url = implode("&", $parts);
+
+$redirector->gotoUrlAndExit($url);

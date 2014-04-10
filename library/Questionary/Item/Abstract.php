@@ -298,6 +298,18 @@ abstract class Questionary_Item_Abstract {
 		
 		return $this;
 	}
+
+	/**
+	 * nastavi novou hodnotu prvku
+	 * @param mixed $value nova hodnota
+	 * @return Questionary_Item_Abstract
+	 */
+	public function setValue($value) {
+		$this->_filledVal = $value;
+		$this->_isFilled = true;
+
+		return $this;
+	}
 	
 	/**
 	 * serializuje tridu do pole

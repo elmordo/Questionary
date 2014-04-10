@@ -4,10 +4,17 @@
 <ul>
 	<?php
 	foreach ($this->filleds as $item) {
+		// sestaveni captionu
+		$caption = isset($this->captionIndex[$item->id][$this->info->caption]) ? unserialize($this->captionIndex[$item->id][$this->info->caption]->data) : "???";
+		
+		if ($this->info->subcaption) {
+			$caption .= " | ";
+			$caption .= isset($this->captionIndex[$item->id][$this->info->subcaption]) ? unserialize($this->captionIndex[$item->id][$this->info->subcaption]->data) : "???";
+		}
 		?>
 	<li>
 		<a href="/admin/filled?filled[id]=<?php echo $item->id; ?>">
-			<?php echo $item->filled_at; ?>
+			<?php echo $item->filled_at . " - " . $caption; ?>
 		</a>
 	</li>
 		<?php

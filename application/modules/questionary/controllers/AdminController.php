@@ -4,6 +4,15 @@ class Questionary_AdminController extends Zend_Controller_Action {
 	public function createAction() {
 		
 	}
+    
+    public function deleteAction() {
+        // nacteni id dotazniku
+        $questionaryId = $this->_request->getParam("questionaryId", 0);
+        
+        // smazani dotazniku
+        $tableQuestionaries = new Questionary_Model_Questionaries();
+        $tableQuestionaries->delete(array("id = ?" => $questionaryId));
+    }
 	
 	public function editAction() {
 		// nacteni dat
@@ -25,6 +34,10 @@ class Questionary_AdminController extends Zend_Controller_Action {
 		$this->view->questionary = $questionary->toClass();
 		$this->view->questionaryRow = $questionary;
 	}
+    
+    public function indexAction() {
+        
+    }
 	
 	public function listAction() {
 		$tableQuestionaries = new Questionary_Model_Questionaries();
@@ -57,8 +70,23 @@ class Questionary_AdminController extends Zend_Controller_Action {
 	public function putJsonAction() {
 		// nacteni dat
 		$data = $this->getRequest()->getParam("questionary", array());
-		$data = array_merge(array("id" => 0, "content" => null), $data);
+		$data = array_merge(array("id" => 0, "content" => null, "format" => "array"), $data);
 		
+        // kontrola formatu dat
+        switch ($data["format"]) {
+            case "json":
+                $data["content"] = Zend_Json::decode($data["content"]);
+                break;
+            
+            case "array":
+                // nic se delat nemusi
+                break;
+            
+            default:
+                // nepodporovany format dat
+                return;
+        }
+        
 		// vyhodnoceni dat
 		if (!$data["id"] || is_null($data["content"])) throw new Zend_Exception("Invalid sent data");
 		

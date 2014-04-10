@@ -1,0 +1,10 @@
+<?php $this->layout()->setLayout("print"); ?>
+<script type="text/javascript">
+<?php
+echo "var QDATA=" . Zend_Json::encode($this->questionary->toArray());
+?>
+</script>
+<div class="questionary-container">
+	<div id="questionary-content"></div>
+</div>
+<script type="text/javascript" src="/js/client/print.js"></script>
